@@ -27,6 +27,43 @@
 @section('title', ' Wisata Tasikmalaya - Beranda')
 @section('content')
 
+<style>
+    /* ===== Marquee Destinasi (geser otomatis tanpa henti) ===== */
+    .marquee-outer {
+        overflow: hidden;
+        position: relative;
+        width: 100%;
+    }
+
+    .marquee-track {
+        display: flex;
+        gap: 1.5rem;
+        width: max-content;
+        animation: marqueeScroll var(--marquee-durasi, 30s) linear infinite;
+    }
+
+    .marquee-track:hover {
+        animation-play-state: paused;
+    }
+
+    .marquee-track .kartu {
+        flex: 0 0 300px;
+        width: 300px;
+    }
+
+    @keyframes marqueeScroll {
+        from { transform: translateX(0); }
+        to   { transform: translateX(-50%); }
+    }
+
+    @media (max-width: 576px) {
+        .marquee-track .kartu {
+            flex: 0 0 260px;
+            width: 260px;
+        }
+    }
+</style>
+
 <!-- ===== HERO ===== -->
 <section class="hero-tasik-foto d-flex align-items-center text-center text-white">
     <div class="hero-overlay"></div>
@@ -70,7 +107,7 @@
     </div>
 </section>
 
-<!-- ===== DESTINASI UNGGULAN (highlight) ===== -->
+<!-- ===== DESTINASI UNGGULAN (highlight, marquee geser otomatis) ===== -->
 <section class="destinasi-section py-5">
     <div class="destinasi-bg"></div>
 
@@ -83,15 +120,31 @@
             </p>
         </div>
 
-        <div class="kartu-container">
-            @forelse ($destinasiUnggulan as $i => $d)
-                <div style="animation-delay: {{ $i * 0.15 }}s">
-                    @include('partials.destinasi-card', ['destinasi' => $d, 'ringkas' => true])
+        @if ($destinasiUnggulan->count() > 0)
+
+            <div class="marquee-outer" style="--marquee-durasi: {{ max($destinasiUnggulan->count() * 6, 20) }}s;">
+                <div class="marquee-track">
+
+                    {{-- Set pertama --}}
+                    @foreach ($destinasiUnggulan as $d)
+                        <div class="kartu">
+                            @include('partials.destinasi-card', ['destinasi' => $d, 'ringkas' => true])
+                        </div>
+                    @endforeach
+
+                    {{-- Set kedua (duplikat, supaya loop terlihat mulus tanpa jeda) --}}
+                    @foreach ($destinasiUnggulan as $d)
+                        <div class="kartu" aria-hidden="true">
+                            @include('partials.destinasi-card', ['destinasi' => $d, 'ringkas' => true])
+                        </div>
+                    @endforeach
+
                 </div>
-            @empty
-                <p class="text-center text-white mb-0">Belum ada destinasi untuk ditampilkan.</p>
-            @endforelse
-        </div>
+            </div>
+
+        @else
+            <p class="text-center text-white mb-0">Belum ada destinasi untuk ditampilkan.</p>
+        @endif
 
         <div class="text-center mt-5">
             <a href="{{ route('destinasi') }}" class="btn-lihat-semua">Lihat Semua Destinasi & Cari Tiket →</a>

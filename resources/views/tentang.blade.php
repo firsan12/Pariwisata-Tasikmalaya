@@ -80,7 +80,9 @@
                 <div class="col-6 col-md-3">
                     <div class="tentang-stat" style="animation-delay: <?php echo ($i * 0.12); ?>s">
                         <i class="bi <?php echo $s['ikon']; ?> tentang-stat-ikon"></i>
-                        <h3><?php echo $s['angka']; ?></h3>
+                        <h3>
+                            <span class="tentang-angka" data-target="<?php echo $s['angka']; ?>">0</span>
+                        </h3>
                         <p><?php echo $s['label']; ?></p>
                     </div>
                 </div>
@@ -117,5 +119,73 @@
 
     </div>
 </section>
+
+<style>
+    .tentang-angka {
+        display: inline-block;
+        transition: transform 0.2s ease;
+    }
+
+    .tentang-angka.selesai-hitung {
+        animation: bounceAngka 0.4s ease;
+    }
+
+    @keyframes bounceAngka {
+        0%   { transform: scale(1); }
+        40%  { transform: scale(1.15); }
+        100% { transform: scale(1); }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const elemenAngka = document.querySelectorAll('.tentang-angka');
+
+    function animasiHitung(elemen) {
+        const target = elemen.getAttribute('data-target');
+
+        const angkaBersih = parseFloat(target.replace(/[^0-9.]/g, ''));
+        const suffix = target.replace(/[0-9.]/g, '');
+
+        if (isNaN(angkaBersih)) {
+            elemen.textContent = target;
+            return;
+        }
+
+        const durasi = 1500;
+        const mulai = performance.now();
+
+        function frame(waktuSekarang) {
+            const progres = Math.min((waktuSekarang - mulai) / durasi, 1);
+            const easeOut = 1 - Math.pow(1 - progres, 3);
+            const nilaiSekarang = Math.floor(easeOut * angkaBersih);
+
+            elemen.textContent = nilaiSekarang + suffix;
+
+            if (progres < 1) {
+                requestAnimationFrame(frame);
+            } else {
+                elemen.textContent = angkaBersih + suffix;
+                elemen.classList.add('selesai-hitung');
+            }
+        }
+
+        requestAnimationFrame(frame);
+    }
+
+    const observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                animasiHitung(entry.target);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.4 });
+
+    elemenAngka.forEach(function (elemen) {
+        observer.observe(elemen);
+    });
+});
+</script>
 
 @endsection

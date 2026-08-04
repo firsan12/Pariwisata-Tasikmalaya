@@ -214,22 +214,6 @@ function salinEwallet() {
 }
 </script>
 
-<?php if ($booking->status === 'lunas') { ?>
-
-    <div class="bayar-panel text-center" style="border-color:#2ecc71;">
-        <span class="bayar-label" style="color:#2ecc71;"><i class="bi bi-check-circle-fill"></i> Pembayaran Berhasil</span>
-        <p class="bayar-sub">Dikonfirmasi pada <strong><?php echo $booking->dibayar_at->translatedFormat('d F Y, H:i:s'); ?> WIB</strong>.</p>
-        <p class="bayar-jumlah">Total Dibayar: <strong>Rp <?php echo number_format($booking->total_harga, 0, ',', '.'); ?></strong></p>
-    </div>
-
-<?php } else if ($booking->status === 'dibatalkan') { ?>
-
-    <div class="bayar-panel text-center" style="border-color:#e74c3c;">
-        <span class="bayar-label" style="color:#e74c3c;"><i class="bi bi-x-circle-fill"></i> Booking Kedaluwarsa</span>
-        <p class="bayar-sub">Dibatalkan otomatis pada <strong><?php echo $booking->dibatalkan_at?->translatedFormat('d F Y, H:i:s'); ?> WIB</strong> karena melewati batas waktu pembayaran.</p>
-    </div>
-
-<?php } else  ?>
 <script>
 (function () {
     const kodeEl = document.getElementById('kodeTiket');
@@ -271,6 +255,5 @@ function salinEwallet() {
     setInterval(perbarui, 1000);
 })();
 </script>
-@endif
 
 @endsection

@@ -993,12 +993,15 @@ body {
   color: #8fa2b8;
 }
 
+/* FIX #1: warna track diganti jadi abu-abu netral (bukan biru muda),
+   supaya bar dengan 0% terisi terlihat kosong, bukan seperti "penuh". */
 .slot-bar {
   width: 100%;
   height: 8px;
-  background: #e3ebf3;
+  background: #eef1f4;
   border-radius: 999px;
   overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .slot-bar-fill {
@@ -1011,7 +1014,9 @@ body {
   background: linear-gradient(90deg, #4a90c2, #0d3b7a);
 }
 
-.slot-bar-fill.hampir_habis {
+/* FIX #2: nama class disamakan dengan yang di-generate Blade (pakai strip -,
+   bukan underscore _), supaya warna oranye "hampir habis" benar-benar tampil. */
+.slot-bar-fill.hampir-habis {
   background: linear-gradient(90deg, #f0b429, #d97706);
 }
 
@@ -2714,21 +2719,6 @@ body {
   font-weight: 600;
 }
 
-.slot-kategori-rincian {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    font-size: 0.78rem;
-    opacity: 0.9;
-}
-.slot-kategori-baris {
-    display: flex;
-    justify-content: space-between;
-    padding: 2px 0;
-}
-.slot-kategori-baris i {
-    margin-right: 4px;
-}
 .detail-kuota-rincian h4 {
     font-size: 1rem;
     margin-bottom: 10px;
@@ -2755,49 +2745,179 @@ body {
     background: rgba(46, 204, 113, 0.2);
     color: #2ecc71;
     font-weight: 600;
-}
-.badge-sisa.habis {
-    background: rgba(231, 76, 60, 0.2);
-    color: #e74c3c;
-}
-.badge-sisa {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 6px;
-    background: rgba(46, 204, 113, 0.2);
-    color: #2ecc71;
-    font-weight: 600;
     font-size: 0.72rem;
 }
 .badge-sisa.habis {
     background: rgba(231, 76, 60, 0.2);
     color: #e74c3c;
 }
-.slot-kategori-rincian {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    font-size: 0.78rem;
-    opacity: 0.9;
+
+/* ===== Form Cari Destinasi ===== */
+.form-cari-destinasi .input-group {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
+    padding: 4px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
-.slot-kategori-baris {
-    display: flex;
-    justify-content: space-between;
-    padding: 2px 0;
+
+.form-cari-destinasi .input-group:focus-within {
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
 }
-.slot-kategori-baris i {
-    margin-right: 4px;
+
+.form-cari-destinasi .input-group-text {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.75);
+    padding-left: 18px;
+    padding-right: 8px;
 }
-.badge-sisa {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 6px;
-    background: rgba(46, 204, 113, 0.2);
-    color: #2ecc71;
+
+.form-cari-destinasi .form-control {
+    background: transparent;
+    border: none;
+    color: #fff;
+    padding: 10px 8px;
+    font-size: 0.95rem;
+    box-shadow: none !important;
+}
+
+.form-cari-destinasi .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.form-cari-destinasi .form-control:focus {
+    background: transparent;
+    color: #fff;
+    box-shadow: none;
+}
+
+.form-cari-destinasi .btn-cari {
+    background: linear-gradient(135deg, #3f6b85, #5b8fb0);
+    border: none;
+    color: #fff;
     font-weight: 600;
-    font-size: 0.72rem;
+    padding: 10px 26px;
+    border-radius: 50px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.badge-sisa.habis {
-    background: rgba(231, 76, 60, 0.2);
-    color: #e74c3c;
+
+.form-cari-destinasi .btn-cari:hover {
+    background: linear-gradient(135deg, #345a72, #4a7a99);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
 }
+
+.form-cari-destinasi .btn-cari:active {
+    transform: translateY(0);
+}
+
+/* Responsif — di layar kecil biar tetap rapi */
+@media (max-width: 576px) {
+    .form-cari-destinasi .input-group-text {
+        padding-left: 14px;
+    }
+    .form-cari-destinasi .btn-cari {
+        padding: 10px 18px;
+        font-size: 0.9rem;
+    }
+}
+
+/* ===== Pagination ===== */
+.pagination {
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.pagination .page-item .page-link {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.85);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.pagination .page-item .page-link:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #3f6b85, #5b8fb0);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.pagination .page-item.disabled .page-link {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.pagination .page-link:focus {
+    box-shadow: none;
+}
+
+/* Tombol Previous/Next: sembunyikan teks/SVG bawaan, ganti ikon panah CSS-only */
+.pagination .page-item:first-child .page-link,
+.pagination .page-item:last-child .page-link {
+    font-size: 0;
+    position: relative;
+    width: 40px;
+    padding: 0;
+}
+
+.pagination .page-item:first-child .page-link svg,
+.pagination .page-item:last-child .page-link svg {
+    display: none; /* sembunyikan ikon SVG bawaan Bootstrap-5 view */
+}
+
+.pagination .page-item:first-child .page-link::before,
+.pagination .page-item:last-child .page-link::before {
+    font-family: "bootstrap-icons";
+    font-size: 0.95rem;
+    line-height: 1;
+    display: inline-block;
+}
+
+.pagination .page-item:first-child .page-link::before {
+    content: "\F284"; /* bi-chevron-left */
+}
+
+.pagination .page-item:last-child .page-link::before {
+    content: "\F285"; /* bi-chevron-right */
+}
+
+@media (max-width: 576px) {
+    .pagination .page-item .page-link {
+        width: 34px;
+        height: 34px;
+        font-size: 0.85rem;
+    }
+    .pagination .page-item:first-child .page-link,
+    .pagination .page-item:last-child .page-link {
+        width: 34px;
+    }
+    .pagination .page-item:first-child .page-link::before,
+    .pagination .page-item:last-child .page-link::before {
+        font-size: 0.85rem;
+    }
+}
+

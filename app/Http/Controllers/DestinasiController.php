@@ -13,10 +13,18 @@ class DestinasiController extends Controller
 
         return view('beranda', compact('destinasiUnggulan'));
     }
-    public function index()
+
+    public function index(Request $request)
     {
-        $destinasiList = Destinasi::latest()->get();
-        return view('destinasi', compact('destinasiList'));
+        $keyword = $request->input('cari');
+
+        $destinasiList = Destinasi::when($keyword, function ($query) use ($keyword) {
+                $query->where('nama', 'like', '%' . $keyword . '%');
+            })
+            ->latest()
+            ->paginate(2);
+
+        return view('destinasi', compact('destinasiList', 'keyword'));
     }
 
     public function show($id)
@@ -79,7 +87,7 @@ class DestinasiController extends Controller
             return back()->withErrors(['kuota_asing' => 'Kuota asing tidak boleh kurang dari yang sudah terisi (' . $destinasi->terisi_asing . ').'])->withInput();
         }
 
-        //$destinasi->update($validated);
+        $destinasi->update($validated);
 
         return redirect()->route('destinasi.detail', $destinasi->id)
             ->with('success', 'Destinasi berhasil diperbarui!');
