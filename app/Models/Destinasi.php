@@ -39,14 +39,19 @@ class Destinasi extends Model
         return $this->hasMany(Booking::class);
     }
 
-    public function getIsBukaAttribute(): bool
-    {
-        $sekarang = Carbon::now('Asia/Jakarta');
-        $jamBuka  = Carbon::parse($this->jam_buka);
-        $jamTutup = Carbon::parse($this->jam_tutup);
+  public function getIsBukaAttribute(): bool
+{
+    $sekarang = Carbon::now('Asia/Jakarta');
+    $jamBuka  = Carbon::parse($this->jam_buka, 'Asia/Jakarta')->setDate($sekarang->year, $sekarang->month, $sekarang->day);
+    $jamTutup = Carbon::parse($this->jam_tutup, 'Asia/Jakarta')->setDate($sekarang->year, $sekarang->month, $sekarang->day);
 
-        return $sekarang->between($jamBuka, $jamTutup);
+    // Kasus jam tutup lewat tengah malam (misal buka 20:00, tutup 02:00)
+    if ($jamTutup->lessThan($jamBuka)) {
+        $jamTutup->addDay();
     }
+
+    return $sekarang->between($jamBuka, $jamTutup);
+}
 
     public function getHargaTermurahAttribute(): int
     {

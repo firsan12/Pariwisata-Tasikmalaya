@@ -91,24 +91,36 @@
                         <div class="tasik-field">
                             <label for="jam_buka" class="tasik-label"><i class="bi bi-sunrise"></i> Jam Buka</label>
                             <input
-                                type="time"
-                                class="tasik-input"
+                                type="text"
+                                class="tasik-input jam-24-input"
                                 id="jam_buka"
                                 name="jam_buka"
                                 value="{{ old('jam_buka') }}"
+                                placeholder="HH:mm"
+                                inputmode="numeric"
+                                maxlength="5"
+                                pattern="^([01]\d|2[0-3]):[0-5]\d$"
+                                autocomplete="off"
                                 required
                             >
+                            <div class="tasik-hint">Format 24 jam, contoh: 08:00</div>
                         </div>
                         <div class="tasik-field">
                             <label for="jam_tutup" class="tasik-label"><i class="bi bi-sunset"></i> Jam Tutup</label>
                             <input
-                                type="time"
-                                class="tasik-input"
+                                type="text"
+                                class="tasik-input jam-24-input"
                                 id="jam_tutup"
                                 name="jam_tutup"
                                 value="{{ old('jam_tutup') }}"
+                                placeholder="HH:mm"
+                                inputmode="numeric"
+                                maxlength="5"
+                                pattern="^([01]\d|2[0-3]):[0-5]\d$"
+                                autocomplete="off"
                                 required
                             >
+                            <div class="tasik-hint">Format 24 jam, contoh: 17:30</div>
                         </div>
                     </div>
 
@@ -169,4 +181,30 @@
     </div>
 
 </div>
+
+<script>
+    document.querySelectorAll('.jam-24-input').forEach(function (input) {
+        input.addEventListener('input', function () {
+            let digits = input.value.replace(/\D/g, '').slice(0, 4);
+
+            if (digits.length >= 3) {
+                let jam = digits.slice(0, 2);
+                let menit = digits.slice(2, 4);
+                input.value = jam + ':' + menit;
+            } else {
+                input.value = digits;
+            }
+        });
+
+        input.addEventListener('blur', function () {
+            let match = input.value.match(/^(\d{1,2}):?(\d{0,2})$/);
+            if (!match) return;
+
+            let jam = Math.min(parseInt(match[1] || '0', 10), 23);
+            let menit = Math.min(parseInt(match[2] || '0', 10), 59);
+
+            input.value = String(jam).padStart(2, '0') + ':' + String(menit).padStart(2, '0');
+        });
+    });
+</script>
 @endsection

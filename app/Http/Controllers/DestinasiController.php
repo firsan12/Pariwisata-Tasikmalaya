@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Destinasi;
+use App\Models\Atraksi;
 use Illuminate\Http\Request;
 
 class DestinasiController extends Controller
@@ -10,8 +11,9 @@ class DestinasiController extends Controller
     public function beranda()
     {
         $destinasiUnggulan = Destinasi::latest()->get();
+        $atraksiUnggulan   = Atraksi::latest()->take(6)->get(); // batasi 6 biar beranda tidak kepanjangan
 
-        return view('beranda', compact('destinasiUnggulan'));
+        return view('beranda', compact('destinasiUnggulan', 'atraksiUnggulan'));
     }
 
     public function index(Request $request)
@@ -41,9 +43,9 @@ class DestinasiController extends Controller
     protected function rules(): array
     {
         return [
-            'nama'         => 'required|string|max:255',
+            'nama'         => 'required|string|min:2|max:255',
             'deskripsi'    => 'required|string',
-            'gambar'       => 'required|string|max:255',
+            'gambar'       => 'required|string|min:2|max:255',
             'jam_buka'     => 'required|date_format:H:i',
             'jam_tutup'    => 'required|date_format:H:i|after:jam_buka',
             'lokasi'       => 'nullable|string|max:255',
@@ -101,4 +103,16 @@ class DestinasiController extends Controller
         return redirect()->route('destinasi')
             ->with('success', 'Destinasi berhasil dihapus!');
     }
+    public function admin(Request $request)
+{
+    $keyword = $request->input('cari');
+
+    $destinasiList = Destinasi::when($keyword, function ($query) use ($keyword) {
+            $query->where('nama', 'like', '%' . $keyword . '%');
+        })
+        ->latest()
+        ->get();
+
+    return view('destinasi-admin', compact('destinasiList', 'keyword'));
+}
 }

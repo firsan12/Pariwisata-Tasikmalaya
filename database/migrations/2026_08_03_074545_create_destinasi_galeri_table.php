@@ -11,7 +11,7 @@ return new class extends Migration
     {
         Schema::create('destinasi_galeri', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('destinasi_id')->constrained('destinasis')->onDelete('cascade');
+            $table->foreignId('destinasi_id')->constrained('destinasi')->onDelete('cascade');
             $table->string('gambar');
             $table->unsignedInteger('urutan')->default(0);
             $table->timestamps();
