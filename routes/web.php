@@ -5,7 +5,7 @@ use App\Http\Controllers\DestinasiController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AtraksiController;
-
+ use App\Http\Controllers\UlasanController;
 
 Route::get('/user', [UserController::class, 'index'])->name('user');
 Route::get('/user/create', [UserController::class, 'create'])->name('user.create');
@@ -48,3 +48,10 @@ Route::post('/pesan-tiket', [BookingController::class, 'store'])->name('pesan-ti
 
 Route::get('/pembayaran/{kodeBooking}', [BookingController::class, 'show'])->name('pembayaran.show');
 Route::post('/pembayaran/{kodeBooking}/konfirmasi', [BookingController::class, 'confirm'])->name('pembayaran.konfirmasi');
+
+Route::delete('/ulasan/{ulasan}', [UlasanController::class, 'destroy'])->name('ulasan.destroy');
+   Route::patch('/ulasan/{ulasan}/approve', [UlasanController::class, 'approve'])->name('ulasan.approve');
+   Route::post('/ulasan/{ulasan}/balas', [UlasanController::class, 'balas'])->name('ulasan.balas');
+
+   Route::post('/destinasi/{destinasi}/ulasan', [App\Http\Controllers\UlasanController::class, 'store'])
+    ->name('ulasan.store');

@@ -126,4 +126,7 @@
     </div>
 </section>
 
+{{-- ===== ULASAN & KOMENTAR ===== --}}
+@include('partials.ulasan-section', ['destinasi' => $destinasi])
+
 @endsection

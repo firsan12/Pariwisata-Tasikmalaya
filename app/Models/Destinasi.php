@@ -35,9 +35,14 @@ class Destinasi extends Model
 
 
     public function bookings()
-    {
-        return $this->hasMany(Booking::class);
-    }
+{
+    return $this->hasMany(Booking::class);
+}
+
+public function ulasan()
+{
+    return $this->hasMany(Ulasan::class, 'destinasi_id');
+}
 
   public function getIsBukaAttribute(): bool
 {
@@ -80,4 +85,7 @@ class Destinasi extends Model
         if ($this->persen_terisi >= 80) return 'hampir_habis';
         return 'tersedia';
     }
+
+    
 }
+

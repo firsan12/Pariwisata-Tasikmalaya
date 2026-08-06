@@ -125,16 +125,23 @@
             <div class="marquee-outer" style="--marquee-durasi: {{ max($destinasiUnggulan->count() * 6, 20) }}s;">
                 <div class="marquee-track">
 
+                    {{--
+                        PENTING: partial 'partials.destinasi-card' SUDAH membungkus
+                        dirinya sendiri dengan <div class="kartu">...</div>. Jangan
+                        tambahkan wrapper <div class="kartu"> lagi di sini — itu
+                        menyebabkan .kartu bertumpuk dua kali (nested), sehingga
+                        muncul "bayangan putih dobel" di pinggir tiap kartu karena
+                        padding + border-radius + box-shadow diterapkan dua kali.
+                    --}}
+
                     {{-- Set pertama --}}
                     @foreach ($destinasiUnggulan as $d)
-                        <div class="kartu">
-                            @include('partials.destinasi-card', ['destinasi' => $d, 'ringkas' => true])
-                        </div>
+                        @include('partials.destinasi-card', ['destinasi' => $d, 'ringkas' => true])
                     @endforeach
 
                     {{-- Set kedua (duplikat, supaya loop terlihat mulus tanpa jeda) --}}
                     @foreach ($destinasiUnggulan as $d)
-                        <div class="kartu" aria-hidden="true">
+                        <div aria-hidden="true">
                             @include('partials.destinasi-card', ['destinasi' => $d, 'ringkas' => true])
                         </div>
                     @endforeach

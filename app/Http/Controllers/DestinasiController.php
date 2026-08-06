@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Destinasi;
 use App\Models\Atraksi;
 use Illuminate\Http\Request;
-
+use app\Models\Ulasan;
 class DestinasiController extends Controller
 {
     public function beranda()

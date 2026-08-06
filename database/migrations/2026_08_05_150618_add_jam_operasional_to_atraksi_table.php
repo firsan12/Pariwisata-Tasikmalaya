@@ -9,20 +9,18 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::table('atraksi', function (Blueprint $table) {
-            //
-        });
-    }
+   public function up(): void
+{
+    Schema::table('atraksi', function (Blueprint $table) {
+        $table->string('jam_operasional')->nullable()->after('gambar');
+    });
+}
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::table('atraksi', function (Blueprint $table) {
-            //
-        });
+public function down(): void
+{
+    Schema::table('atraksi', function (Blueprint $table) {
+        $table->dropColumn('jam_operasional');
+    });
+
     }
 };

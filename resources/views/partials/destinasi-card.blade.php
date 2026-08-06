@@ -6,6 +6,8 @@
     - $ringkas     : bool, default false. Kalau true, sembunyikan rincian kuota
                       per kategori (dipakai di beranda supaya kartu tidak terlalu panjang).
 --}}
+
+
 @php
     $ringkas = $ringkas ?? false;
 @endphp
