@@ -33,6 +33,10 @@ class Destinasi extends Model
     'terisi_asing',
 ];
 
+public function atraksi()
+{
+    return $this->hasMany(Atraksi::class);
+}
 
     public function bookings()
 {

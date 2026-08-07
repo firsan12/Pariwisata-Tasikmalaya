@@ -10,6 +10,7 @@ class Atraksi extends Model
     use HasFactory;
     protected $table = 'atraksi';
     protected $fillable = [
+        'destinasi_id',
         'nama',
         'deskripsi',
         'kategori',
@@ -17,5 +18,10 @@ class Atraksi extends Model
         'gambar',
         'jam_operasional',
     ];
+
+    public function destinasi()
+{
+    return $this->belongsTo(Destinasi::class);
+}
 
 }

@@ -33,8 +33,23 @@ return new class extends Migration
             $table->unsignedSmallInteger('kode_unik')->default(0);
             $table->unsignedBigInteger('total_transfer')->default(0);
 
-            $table->enum('status', ['pending', 'lunas', 'dibatalkan'])->default('pending');
+            // 'pending'             -> booking dibuat, belum ada klaim bayar
+            // 'menunggu_verifikasi' -> user sudah klaim transfer, menunggu admin
+            // 'lunas'               -> sudah diverifikasi admin (satu-satunya jalur resmi)
+            // 'ditolak'             -> klaim ditolak admin (misal bukti tidak valid)
+            // 'dibatalkan'          -> dibatalkan (expired / manual)
+            $table->enum('status', ['pending', 'menunggu_verifikasi', 'lunas', 'ditolak', 'dibatalkan'])
+                ->default('pending');
+
+            // Klaim pembayaran oleh user (belum tentu benar, hanya klaim)
+            $table->timestamp('klaim_bayar_at')->nullable();
+            $table->string('bukti_transfer_path')->nullable();
+
+            // Audit trail verifikasi — hanya diisi oleh AdminPaymentVerificationController
             $table->timestamp('dibayar_at')->nullable();
+            $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->string('verified_ip')->nullable();
+            $table->string('alasan_ditolak')->nullable();
 
             $table->timestamps();
         });

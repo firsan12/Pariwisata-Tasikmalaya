@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('bookings', function (Blueprint $table) {
-            $table->timestamp('dibatalkan_at')->nullable()->after('dibayar_at');
+            $table->timestamp('dibatalkan_at')->nullable()->after('alasan_ditolak');
         });
     }
 

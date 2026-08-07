@@ -6,9 +6,16 @@ use App\Models\Booking;
 use App\Models\Destinasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 
 class BookingController extends Controller
 {
+    // Batas waktu pembayaran (menit) sebelum booking pending dianggap kedaluwarsa.
+    // Nilai ini juga dipakai command booking:batalkan-kedaluwarsa (--menit=60) di Kernel.php —
+    // kalau diubah, pastikan diubah juga di sana supaya konsisten.
+    protected int $batasWaktuMenit = 60;
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -33,6 +40,7 @@ class BookingController extends Controller
 
         try {
             $booking = DB::transaction(function () use ($validated) {
+                // Lock row destinasi supaya aman dari race condition saat kuota hampir habis
                 $destinasi = Destinasi::where('id', $validated['destinasi_id'])->lockForUpdate()->first();
 
                 if ($destinasi->terisi_dewasa + $validated['jumlah_dewasa'] > $destinasi->kuota_dewasa) {
@@ -70,6 +78,7 @@ class BookingController extends Controller
                     'ewallet_kode'      => $validated['ewallet_kode'] ?? null,
                     'kode_unik'         => $kodeUnik,
                     'total_transfer'    => $total + $kodeUnik,
+                    // status default tetap 'pending' — booking dibuat, belum ada indikasi bayar
                     'status'            => 'pending',
                 ]);
 
@@ -89,20 +98,71 @@ class BookingController extends Controller
     public function show(string $kodeBooking)
     {
         $booking = Booking::with('destinasi')->where('kode_booking', $kodeBooking)->firstOrFail();
-        return view('pembayaran', compact('booking'));
-    }
 
-    public function confirm(string $kodeBooking)
-    {
-        $booking = Booking::where('kode_booking', $kodeBooking)->firstOrFail();
-
-        if ($booking->status === 'pending') {
-            $booking->update([
-                'status'     => 'lunas',
-                'dibayar_at' => now(),
-            ]);
+        // Auto-cancel kalau sudah lewat batas waktu dan belum ada klaim/pembayaran
+        if ($booking->sudahKedaluwarsa($this->batasWaktuMenit)) {
+            $booking->batalkanDanKembalikanKuota();
+            $booking->refresh();
         }
 
-        return redirect()->route('pembayaran.show', $booking->kode_booking);
+        $batasWaktu = $booking->created_at->addMinutes($this->batasWaktuMenit);
+
+        return view('pembayaran', compact('booking', 'batasWaktu'));
+    }
+
+    /**
+     * PUBLIC — user klaim "saya sudah transfer".
+     * TIDAK langsung mengubah status jadi 'lunas'. Hanya menandai bahwa
+     * user mengklaim sudah membayar, sehingga masuk antrean verifikasi admin.
+     * Ini satu-satunya jalur klaim — jangan buat endpoint serupa di controller lain.
+     * Konfirmasi 'lunas' yang sebenarnya HANYA terjadi lewat
+     * AdminPaymentVerificationController::approve() (butuh login admin).
+     */
+    public function claimPaid(Request $request, string $kodeBooking)
+    {
+        // Batasi percobaan per IP + kode booking, cegah spam/brute-force
+        $key = 'claim-paid:' . $request->ip() . ':' . $kodeBooking;
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            return back()->withErrors(['status' => 'Terlalu banyak percobaan, coba lagi beberapa saat lagi.']);
+        }
+        RateLimiter::hit($key, 300);
+
+        $booking = Booking::where('kode_booking', $kodeBooking)->firstOrFail();
+
+        // Cek expiry dulu sebelum terima klaim — jangan sampai booking basi bisa diklaim
+        if ($booking->sudahKedaluwarsa($this->batasWaktuMenit)) {
+            $booking->batalkanDanKembalikanKuota();
+
+            return redirect()->route('pembayaran.show', $booking->kode_booking)
+                ->withErrors(['status' => 'Batas waktu pembayaran sudah habis. Booking dibatalkan otomatis.']);
+        }
+
+        if ($booking->status !== 'pending') {
+            return redirect()->route('pembayaran.show', $booking->kode_booking);
+        }
+
+        $validated = $request->validate([
+            // opsional: minta bukti transfer untuk mempercepat & memperkuat verifikasi manual
+            'bukti_transfer' => 'nullable|image|max:4096',
+        ]);
+
+        $path = null;
+        if ($request->hasFile('bukti_transfer')) {
+            $path = $request->file('bukti_transfer')->store('bukti-transfer', 'private');
+        }
+
+        $booking->update([
+            'status'              => 'menunggu_verifikasi',
+            'bukti_transfer_path' => $path,
+            'klaim_bayar_at'      => now(),
+        ]);
+
+        Log::info('Booking claimed as paid by user', [
+            'kode_booking' => $booking->kode_booking,
+            'ip'           => $request->ip(),
+        ]);
+
+        return redirect()->route('pembayaran.show', $booking->kode_booking)
+            ->with('info', 'Terima kasih, klaim pembayaran Anda sedang diverifikasi oleh admin.');
     }
 }

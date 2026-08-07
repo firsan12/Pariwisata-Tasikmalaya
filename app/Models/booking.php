@@ -16,13 +16,19 @@ class Booking extends Model
         'subtotal_dewasa', 'subtotal_anak', 'subtotal_asing', 'total_harga',
         'metode_pembayaran', 'bank_kode', 'ewallet_kode', 'kode_unik', 'total_transfer',
         'status', 'dibayar_at',
+        // kolom untuk alur klaim & verifikasi pembayaran
+        'klaim_bayar_at', 'bukti_transfer_path',
+        'verified_by', 'verified_ip', 'alasan_ditolak',
+        'dibatalkan_at',
     ];
 
     protected $casts = [
-    'tanggal_kunjungan' => 'date',
-    'dibayar_at'        => 'datetime',
-    'dibatalkan_at'     => 'datetime',
-];
+        'tanggal_kunjungan' => 'date',
+        'dibayar_at'        => 'datetime',
+        'dibatalkan_at'     => 'datetime',
+        'klaim_bayar_at'    => 'datetime',
+    ];
+
     public function getRouteKeyName(): string
     {
         return 'kode_booking';
@@ -31,6 +37,14 @@ class Booking extends Model
     public function destinasi()
     {
         return $this->belongsTo(Destinasi::class);
+    }
+
+    /**
+     * Admin yang melakukan verifikasi pembayaran (approve/reject).
+     */
+    public function verifier()
+    {
+        return $this->belongsTo(User::class, 'verified_by');
     }
 
     public function getTotalTiketAttribute(): int
@@ -47,8 +61,34 @@ class Booking extends Model
         return $kode;
     }
 
-    protected $appends = [
-    'harga_termurah',
-];
+    /**
+     * Cek apakah booking pending ini sudah lewat batas waktu pembayaran.
+     */
+    public function sudahKedaluwarsa(int $batasMenit = 60): bool
+    {
+        return $this->status === 'pending'
+            && $this->created_at->addMinutes($batasMenit)->isPast();
+    }
 
+    /**
+     * Batalkan booking & kembalikan kuota destinasi terkait.
+     * SATU-SATUNYA tempat yang boleh melakukan ini.
+     */
+    public function batalkanDanKembalikanKuota(): void
+    {
+        \Illuminate\Support\Facades\DB::transaction(function () {
+            $destinasi = $this->destinasi()->lockForUpdate()->first();
+
+            if ($destinasi) {
+                $destinasi->decrement('terisi_dewasa', $this->jumlah_dewasa);
+                $destinasi->decrement('terisi_anak', $this->jumlah_anak);
+                $destinasi->decrement('terisi_asing', $this->jumlah_asing);
+            }
+
+            $this->update([
+                'status'        => 'dibatalkan',
+                'dibatalkan_at' => now(),
+            ]);
+        });
+    }
 }

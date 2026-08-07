@@ -3,6 +3,8 @@
 @section('content')
 
 <?php
+    use App\Services\QrisService;
+
     $daftar_bank = array(
         "bca" => "BCA Virtual Account", "bri" => "BRI Virtual Account",
         "mandiri" => "Mandiri Virtual Account", "bni" => "BNI Virtual Account", "seabank" => "SeaBank",
@@ -10,47 +12,12 @@
     $rekening_seabank = array("nomor" => "901287295755", "nama" => "Firman Khoerul Ihsan");
     $daftar_ewallet_label = array("gopay" => "GoPay", "ovo" => "OVO", "dana" => "DANA", "shopeepay" => "ShopeePay");
     $gambar_qris_ewallet = "qris-nasional.jpg";
-    $qris_statis_dasar = "00020101021126610014COM.GO-JEK.WWW01189360091437330363670210G7330363670303UMI51440014ID.CO.QRIS.WWW0215ID10254568922290303UMI5204581253033605802ID5912Firman ihsan6009PEKANBARU61052829162070703A0163040762";
 
-    function hitungCrc16Qris($data) {
-        $crc = 0xFFFF;
-        for ($i = 0; $i < strlen($data); $i++) {
-            $crc ^= (ord($data[$i]) << 8);
-            for ($j = 0; $j < 8; $j++) {
-                $crc = (($crc & 0x8000) !== 0) ? (($crc << 1) ^ 0x1021) & 0xFFFF : ($crc << 1) & 0xFFFF;
-            }
-        }
-        return strtoupper(str_pad(dechex($crc), 4, '0', STR_PAD_LEFT));
-    }
-
-    function qrisStatisKeDinamis($qrisStatis, $nominal) {
-        $qris = substr($qrisStatis, 0, -4);
-        $qris = str_replace('010211', '010212', $qris);
-        $nominalStr = (string) (int) $nominal;
-        $tagJumlah  = '54' . str_pad((string) strlen($nominalStr), 2, '0', STR_PAD_LEFT) . $nominalStr;
-        $bagian     = explode('5802ID', $qris);
-        $qrisBaru   = $bagian[0] . $tagJumlah . '5802ID' . $bagian[1];
-        return $qrisBaru . hitungCrc16Qris($qrisBaru);
-    }
-
-    define('KODE_TIKET_INTERVAL_DETIK', 20);
-
-    function hitungHashFnv1a($str) {
-        $hash = 0x811c9dc5;
-        for ($i = 0; $i < strlen($str); $i++) {
-            $hash ^= ord($str[$i]);
-            $hash  = ($hash * 0x01000193) & 0xFFFFFFFF;
-        }
-        return $hash;
-    }
-
-    function buatKodeTiketRealtime($kodeBooking, $waktuUnix) {
-        $window = intdiv($waktuUnix, KODE_TIKET_INTERVAL_DETIK);
-        $hash   = hitungHashFnv1a($kodeBooking . '-' . $window);
-        return substr(strtoupper(str_pad(base_convert((string) $hash, 10, 36), 6, '0', STR_PAD_LEFT)), -6);
-    }
-
-    $kodeTiket = buatKodeTiketRealtime($booking->kode_booking, time());
+    // Semua logika QRIS dinamis & kode tiket real-time sekarang HANYA ada di
+    // App\Services\QrisService — jangan definisikan ulang fungsi hash/CRC di view manapun.
+    $kodeTiket = $booking->status === 'lunas'
+        ? QrisService::buatKodeTiketRealtime($booking->kode_booking, time())
+        : null;
     $destinasi = $booking->destinasi;
 ?>
 
@@ -69,6 +36,10 @@
     <i class="bi bi-x-circle-fill struk-icon" style="color:#e74c3c;"></i>
     <h2>Booking Dibatalkan</h2>
     <p>Booking ini otomatis dibatalkan karena melewati batas waktu pembayaran. Kuota tiket sudah dikembalikan.</p>
+<?php } else if ($booking->status === 'menunggu_verifikasi') { ?>
+    <i class="bi bi-clock-history struk-icon" style="color:#f1c40f;"></i>
+    <h2>Menunggu Verifikasi</h2>
+    <p>Klaim pembayaranmu sedang diperiksa oleh admin. Tiket akan aktif setelah diverifikasi.</p>
 <?php } else { ?>
     <i class="bi bi-hourglass-split struk-icon"></i>
     <h2>Selesaikan Pembayaran</h2>
@@ -87,6 +58,28 @@
                         <p class="bayar-jumlah">Total Dibayar: <strong>Rp <?php echo number_format($booking->total_harga, 0, ',', '.'); ?></strong></p>
                     </div>
 
+                    <!--
+                        Kode Tiket (real-time) HANYA muncul di sini, setelah status benar-benar 'lunas'
+                        (dikonfirmasi admin lewat AdminPaymentVerificationController).
+                        JANGAN dipindahkan ke luar blok status==='lunas' ini — kode tiket adalah
+                        bukti masuk, jadi tidak boleh tersedia sebelum pembayaran diverifikasi.
+                    -->
+                    <div class="text-center mt-3">
+                        <div style="display:inline-block;padding:10px 18px;border:1px dashed currentColor;border-radius:10px;">
+                            <div style="font-size:.8rem;opacity:.8;"><i class="bi bi-arrow-repeat"></i> Kode Tiket (real-time)</div>
+                            <div id="kodeTiket" style="font-size:1.4rem;font-weight:700;letter-spacing:2px;"><?php echo $kodeTiket; ?></div>
+                            <div style="font-size:.72rem;opacity:.7;">Kode ini otomatis berganti setiap <?php echo QrisService::KODE_TIKET_INTERVAL_DETIK; ?> detik.</div>
+                        </div>
+                    </div>
+
+                <?php } else if ($booking->status === 'menunggu_verifikasi') { ?>
+
+                    <div class="bayar-panel text-center" style="border-color:#f1c40f;">
+                        <span class="bayar-label" style="color:#f1c40f;"><i class="bi bi-clock-history"></i> Menunggu Verifikasi Admin</span>
+                        <p class="bayar-sub">Klaim pembayaranmu sudah kami terima pada <strong><?php echo $booking->klaim_bayar_at?->translatedFormat('d F Y, H:i:s'); ?> WIB</strong> dan sedang diperiksa.</p>
+                        <p class="bayar-jumlah">Total Transfer: <strong>Rp <?php echo number_format($booking->total_transfer, 0, ',', '.'); ?></strong></p>
+                    </div>
+
                 <?php } else { ?>
 
                     <?php if ($booking->metode_pembayaran === 'qris') { ?>
@@ -94,7 +87,7 @@
                             <span class="bayar-label"><i class="bi bi-qr-code"></i> Bayar dengan QRIS</span>
                             <p class="bayar-sub">Scan kode di bawah menggunakan aplikasi m-banking atau e-wallet apa pun.</p>
                             <div class="qris-img-wrap">
-                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=<?php echo urlencode(qrisStatisKeDinamis($qris_statis_dasar, $booking->total_transfer)); ?>" width="220" height="220" alt="QRIS">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=<?php echo urlencode(QrisService::qrisStatisKeDinamis($booking->total_transfer)); ?>" width="220" height="220" alt="QRIS">
                             </div>
                             <p class="bayar-sub mb-0">a.n. <strong>Firman Ihsan</strong></p>
                             <p class="bayar-jumlah">Total Transfer (kode unik <?php echo $booking->kode_unik; ?>): <strong>Rp <?php echo number_format($booking->total_transfer, 0, ',', '.'); ?></strong></p>
@@ -142,14 +135,6 @@
                         </div>
                     <?php } ?>
 
-                    <div class="text-center mt-3">
-                        <div style="display:inline-block;padding:10px 18px;border:1px dashed currentColor;border-radius:10px;">
-                            <div style="font-size:.8rem;opacity:.8;"><i class="bi bi-arrow-repeat"></i> Kode Tiket (real-time)</div>
-                            <div id="kodeTiket" style="font-size:1.4rem;font-weight:700;letter-spacing:2px;"><?php echo $kodeTiket; ?></div>
-                            <div style="font-size:.72rem;opacity:.7;">Kode ini otomatis berganti setiap <?php echo KODE_TIKET_INTERVAL_DETIK; ?> detik.</div>
-                        </div>
-                    </div>
-
                 <?php } ?>
 
                 <hr class="struk-divider">
@@ -185,9 +170,12 @@
     <a href="{{ route('destinasi') }}" class="btn-lihat-semua"><i class="bi bi-arrow-left"></i> Kembali ke Destinasi</a>
 <?php } else if ($booking->status === 'dibatalkan') { ?>
     <a href="{{ route('destinasi.detail', $destinasi->id) }}" class="btn-lihat-semua"><i class="bi bi-arrow-repeat"></i> Pesan Ulang</a>
+<?php } else if ($booking->status === 'menunggu_verifikasi') { ?>
+    <span class="btn-lihat-semua" style="opacity:.7;pointer-events:none;"><i class="bi bi-hourglass-split"></i> Menunggu Verifikasi</span>
 <?php } else { ?>
-    <form method="POST" action="{{ route('pembayaran.konfirmasi', $booking->kode_booking) }}">
+    <form method="POST" action="{{ route('pembayaran.klaim', $booking->kode_booking) }}" enctype="multipart/form-data">
         @csrf
+        <input type="file" name="bukti_transfer" accept="image/*" style="margin-bottom:8px;">
         <button type="submit" class="btn-lihat-semua btn-wa-konfirmasi"><i class="bi bi-check-circle"></i> Saya Sudah Bayar</button>
     </form>
 <?php } ?>
@@ -214,13 +202,22 @@ function salinEwallet() {
 }
 </script>
 
+<?php if ($booking->status === 'lunas') { ?>
+<!--
+    Catatan: JS di bawah ini SENGAJA meniru ulang algoritma FNV1a + windowing
+    dari App\Services\QrisService::buatKodeTiketRealtime() supaya kode tiket
+    bisa berganti tiap 20 detik tanpa reload halaman. Kalau algoritma di
+    QrisService diubah, JS ini WAJIB diubah juga supaya tetap sinkron.
+    Ini bukan duplikasi yang tidak disengaja — cuma satu-satunya cara membuat
+    kode berganti real-time di client tanpa polling server tiap detik.
+-->
 <script>
 (function () {
     const kodeEl = document.getElementById('kodeTiket');
     if (!kodeEl) return;
 
     const KODE_BOOKING   = <?php echo json_encode($booking->kode_booking); ?>;
-    const INTERVAL_DETIK = <?php echo KODE_TIKET_INTERVAL_DETIK; ?>;
+    const INTERVAL_DETIK = <?php echo QrisService::KODE_TIKET_INTERVAL_DETIK; ?>;
 
     function hashFnv1a(str) {
         let hash = 0x811c9dc5;
@@ -255,5 +252,6 @@ function salinEwallet() {
     setInterval(perbarui, 1000);
 })();
 </script>
+<?php } ?>
 
 @endsection

@@ -31,6 +31,7 @@ class DestinasiController extends Controller
 
     public function show($id)
     {
+     $destinasi = Destinasi::with('atraksi')->findOrFail($id);
         $destinasi = Destinasi::findOrFail($id);
         return view('destinasi-detail', compact('destinasi'));
     }
@@ -115,4 +116,5 @@ class DestinasiController extends Controller
 
     return view('destinasi-admin', compact('destinasiList', 'keyword'));
 }
+
 }

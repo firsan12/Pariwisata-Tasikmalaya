@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Models\Booking;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class BatalkanBookingKedaluwarsa extends Command
@@ -30,20 +29,8 @@ class BatalkanBookingKedaluwarsa extends Command
 
         foreach ($bookingKedaluwarsa as $booking) {
             try {
-                DB::transaction(function () use ($booking) {
-                    $destinasi = $booking->destinasi()->lockForUpdate()->first();
-
-                    if ($destinasi) {
-                        $destinasi->decrement('terisi_dewasa', $booking->jumlah_dewasa);
-                        $destinasi->decrement('terisi_anak', $booking->jumlah_anak);
-                        $destinasi->decrement('terisi_asing', $booking->jumlah_asing);
-                    }
-
-                    $booking->update([
-                        'status'        => 'dibatalkan',
-                        'dibatalkan_at' => now(),
-                    ]);
-                });
+                // Logika pembatalan sekarang satu-satunya sumber: Booking::batalkanDanKembalikanKuota()
+                $booking->batalkanDanKembalikanKuota();
 
                 $jumlahDibatalkan++;
                 $this->line("Dibatalkan: {$booking->kode_booking}");

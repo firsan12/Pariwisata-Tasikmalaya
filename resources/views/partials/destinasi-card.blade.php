@@ -1,36 +1,27 @@
 {{--
     Partial kartu destinasi — dipakai di beranda.blade.php & destinasi.blade.php.
-
     Variabel yang diterima:
     - $destinasi   : instance Model Destinasi (wajib)
     - $ringkas     : bool, default false. Kalau true, sembunyikan rincian kuota
                       per kategori (dipakai di beranda supaya kartu tidak terlalu panjang).
 --}}
-
-
 @php
     $ringkas = $ringkas ?? false;
 @endphp
-
 <div class="kartu">
     <div class="kartu-img-wrap">
         <img src="{{ asset('images/' . $destinasi->gambar) }}" alt="Foto {{ $destinasi->nama }}">
-
         <span class="badge-status {{ $destinasi->is_buka ? 'buka' : 'tutup' }}">
             <span class="badge-dot"></span> {{ $destinasi->is_buka ? 'Sedang buka' : 'Sedang tutup' }}
         </span>
-
         <span class="badge-harga">Mulai Rp {{ number_format($destinasi->harga_termurah, 0, ',', '.') }}</span>
     </div>
-
     <h3>{{ $destinasi->nama }}</h3>
     <p>{{ Str::limit($destinasi->deskripsi, $ringkas ? 140 : 100) }}</p>
-
     <p class="jam-info">
         Jam operasional: {{ \Carbon\Carbon::parse($destinasi->jam_buka)->format('H:i') }}
         – {{ \Carbon\Carbon::parse($destinasi->jam_tutup)->format('H:i') }} WIB
     </p>
-
     <div class="slot-info">
         <div class="slot-label">
             @if ($destinasi->ket_slot === 'habis')
@@ -46,7 +37,6 @@
             <div class="slot-bar-fill {{ $destinasi->ket_slot === 'habis' ? 'habis' : ($destinasi->ket_slot === 'hampir_habis' ? 'hampir-habis' : 'tersedia') }}"
                  style="width: {{ $destinasi->persen_terisi }}%"></div>
         </div>
-
         @unless ($ringkas)
             <div class="slot-kategori-rincian mt-2">
                 <div class="slot-kategori-baris">
@@ -64,7 +54,6 @@
             </div>
         @endunless
     </div>
-
     <div class="kartu-aksi">
         <a href="{{ route('destinasi.detail', $destinasi->id) }}" class="btn-detail">Lihat Detail</a>
         @if ($destinasi->ket_slot === 'habis')

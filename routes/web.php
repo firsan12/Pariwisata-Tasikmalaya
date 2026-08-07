@@ -5,7 +5,8 @@ use App\Http\Controllers\DestinasiController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AtraksiController;
- use App\Http\Controllers\UlasanController;
+use App\Http\Controllers\UlasanController;
+use App\Http\Controllers\Admin\AdminPaymentVerificationController;
 
 Route::get('/user', [UserController::class, 'index'])->name('user');
 Route::get('/user/create', [UserController::class, 'create'])->name('user.create');
@@ -47,11 +48,31 @@ Route::get('/pesan-tiket', fn () => view('pesan-tiket'))->name('pesan-tiket');
 Route::post('/pesan-tiket', [BookingController::class, 'store'])->name('pesan-tiket.store');
 
 Route::get('/pembayaran/{kodeBooking}', [BookingController::class, 'show'])->name('pembayaran.show');
-Route::post('/pembayaran/{kodeBooking}/konfirmasi', [BookingController::class, 'confirm'])->name('pembayaran.konfirmasi');
+
+// PENTING: ini hanya mengklaim "sudah transfer", BUKAN mengonfirmasi lunas.
+// Method di controller bernama claimPaid(), bukan confirm() — jangan diubah balik.
+Route::post('/pembayaran/{kodeBooking}/klaim', [BookingController::class, 'claimPaid'])
+    ->name('pembayaran.klaim')
+    ->middleware('throttle:10,1');
+
+// ===== Admin: Verifikasi Pembayaran =====
+// WAJIB middleware auth. Ini satu-satunya jalur yang boleh mengubah status jadi 'lunas'.
+// Ganti 'can:verify-payment' dengan gate/role sesuai sistem auth admin kamu,
+// atau minimal middleware('auth') kalau belum ada sistem role.
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+    Route::get('/verifikasi', [AdminPaymentVerificationController::class, 'index'])
+        ->name('admin.verifikasi.index');
+    Route::get('/verifikasi/{kodeBooking}/bukti', [AdminPaymentVerificationController::class, 'buktiTransfer'])
+        ->name('admin.verifikasi.bukti');
+    Route::post('/verifikasi/{kodeBooking}/approve', [AdminPaymentVerificationController::class, 'approve'])
+        ->name('admin.verifikasi.approve');
+    Route::post('/verifikasi/{kodeBooking}/reject', [AdminPaymentVerificationController::class, 'reject'])
+        ->name('admin.verifikasi.reject');
+});
 
 Route::delete('/ulasan/{ulasan}', [UlasanController::class, 'destroy'])->name('ulasan.destroy');
-   Route::patch('/ulasan/{ulasan}/approve', [UlasanController::class, 'approve'])->name('ulasan.approve');
-   Route::post('/ulasan/{ulasan}/balas', [UlasanController::class, 'balas'])->name('ulasan.balas');
+Route::patch('/ulasan/{ulasan}/approve', [UlasanController::class, 'approve'])->name('ulasan.approve');
+Route::post('/ulasan/{ulasan}/balas', [UlasanController::class, 'balas'])->name('ulasan.balas');
 
-   Route::post('/destinasi/{destinasi}/ulasan', [App\Http\Controllers\UlasanController::class, 'store'])
+Route::post('/destinasi/{destinasi}/ulasan', [UlasanController::class, 'store'])
     ->name('ulasan.store');

@@ -52,6 +52,11 @@
                            @if (request()->routeIs('kontak')) aria-current="page" @endif
                            href="{{ route('kontak') }}">Kontak</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('pesan-tiket') ? 'active' : '' }}"
+                           @if (request()->routeIs('pesan-tiket')) aria-current="page" @endif
+                           href="{{ route('pesan-tiket') }}">Pesan Tiket</a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -96,6 +101,7 @@
                     <li class="mb-2"><a href="{{ route('destinasi') }}" class="footer-link">Destinasi</a></li>
                     <li class="mb-2"><a href="{{ route('tentang') }}" class="footer-link">Tentang</a></li>
                     <li class="mb-2"><a href="{{ route('kontak') }}" class="footer-link">Kontak</a></li>
+                    <li class="mb-2"><a href="{{ route('pesan-tiket') }}" class="footer-link">Pesan Tiket</a></li>
                 </ul>
             </div>
 
