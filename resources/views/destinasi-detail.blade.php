@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.site')
 
 @section('title', $destinasi->nama . ' - Detail Destinasi')
 @section('content')
@@ -9,16 +9,16 @@
 
 <style>
     :root{
-        --primary:#2563EB;
-        --primary-dark:#1D4ED8;
-        --secondary:#0EA5E9;
-        --accent:#F59E0B;
-        --bg:#F8FAFC;
+        --primary:#0d3b7a;
+        --primary-dark:#092a58;
+        --secondary:#4a90c2;
+        --accent:#D4A857;
+        --bg:#F4F8FB;
         --text:#1E293B;
         --radius-card:20px;
         --radius-btn:16px;
         --radius-input:14px;
-        --shadow-soft:0 10px 30px rgba(0,0,0,.08);
+        --shadow-soft:0 10px 30px rgba(13,59,122,.10);
         --sp-1:8px; --sp-2:16px; --sp-3:24px; --sp-4:32px; --sp-5:48px; --sp-6:64px;
     }
     .destinasi-page{ font-family:'Inter',sans-serif; color:var(--text); background:var(--bg); }
@@ -36,6 +36,12 @@
         background:linear-gradient(180deg, rgba(15,23,42,.15) 0%, rgba(15,23,42,.85) 100%);
     }
     .hero-full .hero-content{ position:relative; z-index:2; padding:var(--sp-6) var(--sp-4) var(--sp-5); max-width:900px; }
+    .breadcrumb-hero{ position:absolute; top:0; left:0; right:0; z-index:2; padding:96px var(--sp-4) 0; }
+    .breadcrumb-hero .breadcrumb-item, .breadcrumb-hero .breadcrumb-item a{ color:rgba(255,255,255,.75); font-size:.9rem; text-decoration:none; }
+    .breadcrumb-hero .breadcrumb-item a:hover{ color:#fff; text-decoration:underline; }
+    .breadcrumb-hero .breadcrumb-item.active{ color:#fff; font-weight:600; }
+    .breadcrumb-hero .breadcrumb-item + .breadcrumb-item::before{ color:rgba(255,255,255,.5); }
+    @media (max-width:576px){ .breadcrumb-hero{ padding-top:84px; } .breadcrumb-hero .breadcrumb-item{ font-size:.8rem; } }
     .hero-full h1{ font-size:2.75rem; font-weight:800; margin-bottom:var(--sp-2); text-shadow:0 4px 18px rgba(0,0,0,.35); }
     .hero-meta{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-3); margin-bottom:var(--sp-2); font-weight:500; }
     .hero-meta .stars i{ color:var(--accent); }
@@ -105,7 +111,7 @@
     .atraksi-card:hover{ transform:translateY(-8px); }
     .atraksi-card img{ height:170px; object-fit:cover; width:100%; }
     .atraksi-card .body{ padding:16px; }
-    .atraksi-card .kategori-tag{ font-size:.75rem; font-weight:600; color:var(--primary); background:#eaf1ff; padding:3px 10px; border-radius:20px; }
+    .atraksi-card .kategori-tag{ font-size:.75rem; font-weight:600; color:var(--primary); background:#eaf1f9; padding:3px 10px; border-radius:20px; }
     .atraksi-card .lihat-detail{ color:var(--primary); font-weight:600; font-size:.9rem; text-decoration:none; }
 
     /* ===== REVIEW ===== */
@@ -126,7 +132,7 @@
         display:flex; justify-content:space-between; align-items:center; border:1.5px solid #e2e8f0;
         border-radius:var(--radius-input); padding:12px 14px; cursor:pointer; transition:.15s ease;
     }
-    .kategori-opsi label:has(input:checked){ border-color:var(--primary); background:#f0f6ff; }
+    .kategori-opsi label:has(input:checked){ border-color:var(--primary); background:#eef4fb; }
     .jumlah-stepper{ display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--sp-3); }
     .stepper-btn{
         width:36px; height:36px; border-radius:50%; border:1.5px solid #e2e8f0; background:#fff;
@@ -137,6 +143,18 @@
     .total-row .label{ color:#8a93a3; }
     .total-row .value{ font-size:1.3rem; font-weight:800; color:var(--text); }
     .btn-pesan-sekarang{ width:100%; text-align:center; justify-content:center; }
+
+    /* ===== FAQ ===== */
+    .faq-accordion .accordion-item{ border:1px solid #eef1f5; border-radius:var(--radius-input) !important; margin-bottom:10px; overflow:hidden; }
+    .faq-accordion .accordion-button{ font-weight:600; color:var(--text); background:#fff; }
+    .faq-accordion .accordion-button:not(.collapsed){ color:var(--primary); background:#eef4fb; box-shadow:none; }
+    .faq-accordion .accordion-button:focus{ box-shadow:none; border-color:#eef1f5; }
+    .faq-accordion .accordion-button::after{ filter:none; }
+    .faq-accordion .accordion-body{ color:#475569; line-height:1.7; }
+
+    /* ===== DESTINASI LAIN (rekomendasi) ===== */
+    .rekomendasi-section{ background:var(--bg); padding:var(--sp-5) var(--sp-3); }
+    .rekomendasi-title{ font-size:1.5rem; font-weight:800; color:var(--primary); margin-bottom:var(--sp-3); text-align:center; }
 
     /* ===== FOOTER ===== */
     .footer-destinasi{ background:#0f172a; color:#cbd5e1; padding:var(--sp-5) var(--sp-3) var(--sp-3); margin-top:var(--sp-5); }
@@ -151,7 +169,14 @@
 <div class="destinasi-page">
 
     {{-- ===== HERO FULLSCREEN ===== --}}
-    <section class="hero-full" style="background-image:url('{{ asset('images/' . $destinasi->gambar) }}')">
+    <section class="hero-full" style="background-image:url('{{ asset('storage/' . $destinasi->gambar) }}')">
+        <nav class="breadcrumb-hero" aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ route('beranda') }}">Beranda</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('destinasi') }}">Destinasi</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ $destinasi->nama }}</li>
+            </ol>
+        </nav>
         <div class="hero-content">
             <h1>{{ $destinasi->nama }}</h1>
             <div class="hero-meta">
@@ -265,7 +290,7 @@
                 <h2>Galeri</h2>
                 @forelse ($destinasi->galeri ?? [] as $foto)
                     @if ($loop->first)<div class="galeri-masonry">@endif
-                        <img src="{{ asset('images/' . $foto->gambar) }}" alt="Galeri {{ $destinasi->nama }}">
+                        <img src="{{ asset('storage/' . $foto->gambar) }}" alt="Galeri {{ $destinasi->nama }}">
                     @if ($loop->last)</div>@endif
                 @empty
                     <div class="galeri-empty">
@@ -283,7 +308,7 @@
                     @forelse ($destinasi->atraksi as $atraksi)
                         <div class="col-md-4">
                             <div class="atraksi-card">
-                                <img src="{{ asset('images/' . $atraksi->gambar) }}">
+                                <img src="{{ asset('storage/' . $atraksi->gambar) }}">
                                 <div class="body">
                                     <span class="kategori-tag">{{ $atraksi->kategori }}</span>
                                     <h6 class="mt-2 mb-1">{{ $atraksi->nama }}</h6>
@@ -322,20 +347,90 @@
                 </iframe>
             </div>
 
-            {{-- AKSI ADMIN --}}
-            <div class="d-flex justify-content-end gap-2">
-                <a href="{{ route('destinasi.create') }}" class="btn btn-navy">
-                    <i class="bi bi-plus-lg me-1"></i> Tambah Destinasi
-                </a>
-                <form action="{{ route('destinasi.destroy', $destinasi->id) }}" method="POST"
-                      onsubmit="return confirm('Hapus dia sekarang!!! karena dia tidak akan kembali👍🏻.')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">
-                        <i class="bi bi-trash"></i> Hapus Destinasi
-                    </button>
-                </form>
+            {{-- FAQ --}}
+            <div class="content-section" id="faq">
+                <h2>Pertanyaan yang Sering Ditanyakan</h2>
+                <div class="accordion faq-accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                Jam berapa {{ $destinasi->nama }} buka?
+                            </button>
+                        </h3>
+                        <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Buka setiap hari mulai pukul {{ \Carbon\Carbon::parse($destinasi->jam_buka)->format('H:i') }}
+                                hingga {{ \Carbon\Carbon::parse($destinasi->jam_tutup)->format('H:i') }} WIB.
+                                Disarankan datang lebih awal terutama saat akhir pekan atau musim liburan agar tidak antre.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                Bagaimana cara memesan tiket?
+                            </button>
+                        </h3>
+                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Pilih kategori tiket dan jumlah pada kotak pemesanan di halaman ini, lalu klik
+                                "Pesan Sekarang". Anda akan diarahkan ke halaman Pesan Tiket untuk melengkapi data
+                                dan menyelesaikan pembayaran.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                Apakah kuota tiket terbatas?
+                            </button>
+                        </h3>
+                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                @if ($destinasi->ket_slot === 'habis')
+                                    Ya, kuota tiket untuk hari ini sudah habis. Silakan cek kembali besok atau pilih destinasi lain.
+                                @else
+                                    Ya, tersedia {{ $destinasi->sisa_slot }} tiket untuk hari ini dari total kuota harian.
+                                    Kuota diperbarui setiap hari, jadi disarankan memesan lebih awal saat mendekati akhir pekan.
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                Apa saja yang perlu dibawa saat berkunjung?
+                            </button>
+                        </h3>
+                        <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Bawa air minum, alas kaki yang nyaman, tabir surya, dan jas hujan/jaket ringan
+                                karena cuaca di area wisata bisa berubah. Simpan bukti pemesanan tiket (digital
+                                atau cetak) untuk ditunjukkan di lokasi.
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            {{-- AKSI ADMIN — hanya tampil untuk admin yang sedang login --}}
+            @auth
+                @if ((Auth::user()->role ?? null) === 'admin')
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ route('destinasi.create') }}" class="btn-primary-grad">
+                            <i class="bi bi-plus-lg me-1"></i> Tambah Destinasi
+                        </a>
+                        <form action="{{ route('destinasi.destroy', $destinasi->id) }}" method="POST"
+                              onsubmit="return confirm('Hapus dia sekarang!!! karena dia tidak akan kembali👍🏻.')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Hapus Destinasi
+                            </button>
+                        </form>
+                    </div>
+                @endif
+            @endauth
 
         </div>
 
@@ -385,7 +480,20 @@
 
     </div>
 
-   
+    {{-- ===== DESTINASI LAIN YANG MUNGKIN KAMU SUKA (lebar penuh) ===== --}}
+    @if ($destinasiLain->isNotEmpty())
+        <section class="rekomendasi-section">
+            <div class="container">
+                <h2 class="rekomendasi-title">Destinasi Lain yang Mungkin Kamu Suka</h2>
+                <div class="kartu-container">
+                    @foreach ($destinasiLain as $lain)
+                        @include('partials.destinasi-card', ['destinasi' => $lain, 'ringkas' => true])
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
 </div>
 
 <script>

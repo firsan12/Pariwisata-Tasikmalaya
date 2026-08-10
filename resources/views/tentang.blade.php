@@ -5,7 +5,7 @@
     $gambar_tentang = 'tata-letak4.jpg';
 ?>
 
-@extends('layouts.app')
+@extends('layouts.site')
 @section('title', 'Wisata Tasikmalaya - Tentang')
 @section('content')
 

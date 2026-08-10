@@ -20,7 +20,6 @@ body {
   background-color: #7fc1e8;
   position: relative;
   padding-top: 12px;
-  overflow: hidden;
   animation: turunNavbar 0.5s ease forwards;
 }
 
@@ -117,6 +116,131 @@ body {
   .logo-ring::before {
     width: 34px;
     height: 34px;
+  }
+}
+
+/* ---- Navbar: pelengkap (link, brand, sticky, search, tombol auth) ---- */
+.navbar-tasik {
+  padding-bottom: 12px;
+  box-shadow: 0 2px 10px rgba(13, 59, 122, 0.08);
+  transition: box-shadow 0.25s ease, padding 0.25s ease, background-color 0.25s ease;
+  z-index: 1030;
+}
+
+.navbar-tasik.navbar-scrolled {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  background-color: #0d3b7a;
+  box-shadow: 0 6px 18px rgba(13, 59, 122, 0.25);
+}
+
+.navbar-tasik .navbar-brand {
+  color: #ffffff;
+  font-size: 1.05rem;
+  letter-spacing: 0.2px;
+}
+
+.navbar-tasik .navbar-nav .nav-link {
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.5rem 1rem;
+}
+
+.navbar-tasik .navbar-nav .nav-link.active,
+.navbar-tasik .navbar-nav .nav-link:hover {
+  color: #ffffff !important;
+}
+
+.navbar-tasik .navbar-nav .nav-link::after {
+  background-color: #D4A857;
+}
+
+.navbar-search-mini {
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 999px;
+  padding: 4px 14px;
+  gap: 6px;
+  min-width: 200px;
+}
+
+.navbar-search-mini i {
+  color: #4a90c2;
+}
+
+.navbar-search-mini input {
+  background: transparent;
+  font-size: 0.85rem;
+  box-shadow: none !important;
+}
+
+.navbar-search-mini input:focus {
+  background: transparent;
+}
+
+.btn-navbar-outline,
+.btn-navbar-cta,
+.btn-navbar-user {
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 8px 18px;
+  white-space: nowrap;
+}
+
+.btn-navbar-outline {
+  color: #ffffff;
+  border: 1.5px solid rgba(255, 255, 255, 0.65);
+  background: transparent;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-navbar-outline:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.btn-navbar-cta {
+  color: #0d3b7a;
+  background: #ffffff;
+  border: 1.5px solid #ffffff;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-navbar-cta:hover {
+  background: #D4A857;
+  border-color: #D4A857;
+  color: #0d3b7a;
+}
+
+.btn-navbar-user {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.btn-navbar-user:hover {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+@media (max-width: 991.98px) {
+  .navbar-tasik .navbar-nav {
+    text-align: center;
+    gap: 4px;
+    padding: 10px 0;
+  }
+  .navbar-search-mini {
+    display: flex !important;
+    width: 100%;
+    margin: 8px 0 !important;
+  }
+  .navbar-auth {
+    justify-content: center;
+    flex-wrap: wrap;
+    padding-top: 8px;
   }
 }
 
@@ -1695,6 +1819,26 @@ body {
 
 .footer-link:hover::after {
   width: 100%;
+}
+
+.footer-social {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.25s ease;
+}
+
+.footer-social:hover {
+  background: #D4A857;
+  border-color: #D4A857;
+  color: #0d3b7a;
+  transform: translateY(-3px);
 }
 
 .footer-divider {

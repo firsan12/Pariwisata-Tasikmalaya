@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.site')
 
 @section('title', 'Ubah Destinasi')
 
@@ -52,7 +52,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('destinasi.update', $destinasi->id) }}" method="POST">
+                <form action="{{ route('destinasi.update', $destinasi->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
 
@@ -83,15 +83,7 @@
 
                     <div class="tasik-field">
                         <label for="gambar" class="tasik-label"><i class="bi bi-image"></i> Nama File Gambar</label>
-                        <input
-                            type="text"
-                            class="tasik-input"
-                            id="gambar"
-                            name="gambar"
-                            value="{{ old('gambar', $destinasi->gambar) }}"
-                            placeholder="contoh: istana-siak.jpg"
-                            required
-                        >
+                       <input type="file" name="gambar" class="form-control" accept="image/*">
                         <div class="tasik-hint">Sementara isi nama file gambar yang sudah tersedia di folder public/images.</div>
                     </div>
 

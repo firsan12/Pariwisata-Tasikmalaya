@@ -9,6 +9,7 @@ class Ulasan extends Model
     protected $fillable = [
         'destinasi_id', 'nama_pengguna', 'email_pengguna',
         'rating', 'komentar', 'status', 'balasan_admin', 'dibalas_pada',
+        
     ];
 
     protected $casts = [

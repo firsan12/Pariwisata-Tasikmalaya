@@ -1,3 +1,7 @@
+@extends('layouts.site')
+@section('title', ' Wisata Tasikmalaya - Beranda')
+@section('content')
+
 <?php
     date_default_timezone_set("Asia/Jakarta");
     $nama = "Wisata Tasikmalaya";
@@ -22,22 +26,26 @@
     }
 ?>
 
-
-@extends('layouts.app')
-@section('title', ' Wisata Tasikmalaya - Beranda')
-@section('content')
-
 {{--
     CATATAN DATA UNTUK SECTION BARU DI BAWAH:
     - $kategoriWisata : koleksi kategori wisata (fallback dummy jika belum dikirim dari controller)
     - $events         : koleksi event/promo (fallback dummy)
     - $testimonis     : koleksi testimoni (fallback dummy)
-    Section Hero, Tentang, Destinasi Unggulan (marquee), dan Kontak TIDAK diubah —
-    tetap memakai data & class CSS asli project (hero-tasik-foto, tentang, destinasi-section, kontak-section).
+    Section Hero, Tentang, dan Kontak TIDAK diubah — tetap memakai data & class CSS asli project
+    (hero-tasik-foto, tentang, kontak-section).
 
-    PENYESUAIAN TERBARU:
-    - Footer "jt-footer" DIHAPUS karena layouts/app.blade.php sudah punya footer sendiri
-      (footer-tasik) yang tampil di semua halaman.
+    PEMBARUAN:
+    - Section "Destinasi Unggulan" SEKARANG DINAMIS PENUH, disamakan dengan kartu di
+      destinasi.blade.php: badge status buka/tutup, badge harga termurah, jam operasional,
+      info slot tiket (ket_slot / sisa_slot / persen_terisi) + progress bar, dan tombol
+      "Pesan Tiket" / "Tiket Habis" kondisional. Partial 'partials.destinasi-card' TIDAK
+      dipakai lagi di sini — markup kartu ditulis langsung (inline), persis pola di halaman
+      Destinasi, supaya kedua halaman konsisten.
+    - Layout diganti ke layouts.site (khusus halaman publik), karena layouts.app
+      adalah layout Breeze berbasis komponen (<x-app-layout>) untuk area dashboard,
+      dan tidak cocok dipakai lewat @extends.
+    - Footer "jt-footer" DIHAPUS karena layouts/site.blade.php sudah punya footer sendiri
+      (footer-tasik) yang tampil di semua halaman publik.
     - Class "col-md-2-4" (tidak valid di Bootstrap) diganti "col-md-4 col-lg".
     - Palet warna section baru (jt-*) disamakan dengan palet asli situs — navy #0d3b7a,
       sky blue #4a90c2, aksen emas #D4A857 — menggantikan biru generik sebelumnya, supaya
@@ -95,6 +103,52 @@
             flex: 0 0 260px;
             width: 260px;
         }
+    }
+
+    /* ===== Info slot tiket pada kartu destinasi — disamakan dengan destinasi.blade.php ===== */
+    .slot-info-ringkas {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .slot-info-ringkas .slot-text {
+        font-weight: 600;
+        color: #1e3a8a;
+    }
+
+    .slot-info-ringkas .slot-text.hampir-habis { color: #ea580c; }
+    .slot-info-ringkas .slot-text.habis { color: #dc2626; }
+
+    .slot-info-ringkas .slot-persen {
+        color: #94a3b8;
+        font-size: 0.8rem;
+    }
+
+    .progress-slot {
+        height: 6px;
+        width: 100%;
+        background: #e2e8f0;
+        border-radius: 999px;
+        overflow: hidden;
+        margin-top: 0.4rem;
+    }
+
+    .progress-slot-bar {
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+        transition: width 0.5s ease;
+    }
+
+    .progress-slot-bar.hampir-habis {
+        background: linear-gradient(90deg, #ea580c, #f59e0b);
+    }
+
+    .progress-slot-bar.habis {
+        background: linear-gradient(90deg, #991b1b, #dc2626);
     }
 
     /* =====================================================================
@@ -265,7 +319,7 @@
     </div>
 </section>
 
-<!-- ===== DESTINASI UNGGULAN (highlight, marquee geser otomatis) — TIDAK DIUBAH ===== -->
+<!-- ===== DESTINASI UNGGULAN (dinamis penuh, mengikuti pola destinasi.blade.php) ===== -->
 <section class="destinasi-section py-5">
     <div class="destinasi-bg"></div>
 
@@ -283,24 +337,99 @@
             <div class="marquee-outer" style="--marquee-durasi: {{ max($destinasiUnggulan->count() * 6, 20) }}s;">
                 <div class="marquee-track">
 
-                    {{--
-                        PENTING: partial 'partials.destinasi-card' SUDAH membungkus
-                        dirinya sendiri dengan <div class="kartu">...</div>. Jangan
-                        tambahkan wrapper <div class="kartu"> lagi di sini — itu
-                        menyebabkan .kartu bertumpuk dua kali (nested), sehingga
-                        muncul "bayangan putih dobel" di pinggir tiap kartu karena
-                        padding + border-radius + box-shadow diterapkan dua kali.
-                    --}}
-
                     {{-- Set pertama --}}
-                    @foreach ($destinasiUnggulan as $d)
-                        @include('partials.destinasi-card', ['destinasi' => $d, 'ringkas' => true])
+                    @foreach ($destinasiUnggulan as $destinasi)
+                        @php
+                            $jamBuka  = \Carbon\Carbon::parse($destinasi->jam_buka);
+                            $jamTutup = \Carbon\Carbon::parse($destinasi->jam_tutup);
+                        @endphp
+
+                        <div class="kartu">
+                            <div class="kartu-img-wrap">
+                                <img src="{{ asset('storage/' . $destinasi->gambar) }}" alt="Foto {{ $destinasi->nama }}">
+                                <span class="badge-status {{ $destinasi->is_buka ? 'buka' : 'tutup' }}">
+                                    <span class="badge-dot"></span> {{ $destinasi->is_buka ? 'Sedang buka' : 'Sedang tutup' }}
+                                </span>
+                                <span class="badge-harga">Mulai Rp {{ number_format($destinasi->harga_termurah, 0, ',', '.') }}</span>
+                            </div>
+
+                            <h3>{{ $destinasi->nama }}</h3>
+                            <p>{{ Str::limit($destinasi->deskripsi, 100) }}</p>
+                            <p class="jam-info">
+                                Jam operasional: {{ $jamBuka->format('H:i') }} – {{ $jamTutup->format('H:i') }} WIB
+                            </p>
+
+                            <div class="slot-info-ringkas">
+                                @if ($destinasi->ket_slot === 'habis')
+                                    <span class="slot-text habis">Tiket habis</span>
+                                @elseif ($destinasi->ket_slot === 'hampir_habis')
+                                    <span class="slot-text hampir-habis">Tersisa {{ $destinasi->sisa_slot }} slot lagi!</span>
+                                @else
+                                    <span class="slot-text">{{ $destinasi->sisa_slot }} slot tersedia</span>
+                                @endif
+                                <span class="slot-persen">{{ $destinasi->persen_terisi }}% terisi</span>
+                            </div>
+                            <div class="progress-slot">
+                                <div class="progress-slot-bar {{ str_replace('_', '-', $destinasi->ket_slot) }}"
+                                     style="width: {{ max($destinasi->persen_terisi, 2) }}%"></div>
+                            </div>
+
+                            <div class="kartu-aksi">
+                                <a href="{{ route('destinasi.detail', $destinasi->id) }}" class="btn-detail">Lihat Detail</a>
+                                @if ($destinasi->ket_slot === 'habis')
+                                    <span class="btn-pesan disabled" aria-disabled="true">Tiket Habis</span>
+                                @else
+                                    <a href="{{ route('pesan-tiket') }}?d={{ $destinasi->id }}" class="btn-pesan">Pesan Tiket</a>
+                                @endif
+                            </div>
+                        </div>
                     @endforeach
 
-                    {{-- Set kedua (duplikat, supaya loop terlihat mulus tanpa jeda) --}}
-                    @foreach ($destinasiUnggulan as $d)
-                        <div aria-hidden="true">
-                            @include('partials.destinasi-card', ['destinasi' => $d, 'ringkas' => true])
+                    {{-- Set kedua (duplikat, supaya loop marquee terlihat mulus tanpa jeda) --}}
+                    @foreach ($destinasiUnggulan as $destinasi)
+                        @php
+                            $jamBuka  = \Carbon\Carbon::parse($destinasi->jam_buka);
+                            $jamTutup = \Carbon\Carbon::parse($destinasi->jam_tutup);
+                        @endphp
+
+                        <div class="kartu" aria-hidden="true">
+                            <div class="kartu-img-wrap">
+                                <img src="{{ asset('storage/' . $destinasi->gambar) }}" alt="Foto {{ $destinasi->nama }}">
+                                <span class="badge-status {{ $destinasi->is_buka ? 'buka' : 'tutup' }}">
+                                    <span class="badge-dot"></span> {{ $destinasi->is_buka ? 'Sedang buka' : 'Sedang tutup' }}
+                                </span>
+                                <span class="badge-harga">Mulai Rp {{ number_format($destinasi->harga_termurah, 0, ',', '.') }}</span>
+                            </div>
+
+                            <h3>{{ $destinasi->nama }}</h3>
+                            <p>{{ Str::limit($destinasi->deskripsi, 100) }}</p>
+                            <p class="jam-info">
+                                Jam operasional: {{ $jamBuka->format('H:i') }} – {{ $jamTutup->format('H:i') }} WIB
+                            </p>
+
+                            <div class="slot-info-ringkas">
+                                @if ($destinasi->ket_slot === 'habis')
+                                    <span class="slot-text habis">Tiket habis</span>
+                                @elseif ($destinasi->ket_slot === 'hampir_habis')
+                                    <span class="slot-text hampir-habis">Tersisa {{ $destinasi->sisa_slot }} slot lagi!</span>
+                                @else
+                                    <span class="slot-text">{{ $destinasi->sisa_slot }} slot tersedia</span>
+                                @endif
+                                <span class="slot-persen">{{ $destinasi->persen_terisi }}% terisi</span>
+                            </div>
+                            <div class="progress-slot">
+                                <div class="progress-slot-bar {{ str_replace('_', '-', $destinasi->ket_slot) }}"
+                                     style="width: {{ max($destinasi->persen_terisi, 2) }}%"></div>
+                            </div>
+
+                            <div class="kartu-aksi">
+                                <a href="{{ route('destinasi.detail', $destinasi->id) }}" class="btn-detail" tabindex="-1">Lihat Detail</a>
+                                @if ($destinasi->ket_slot === 'habis')
+                                    <span class="btn-pesan disabled" aria-disabled="true">Tiket Habis</span>
+                                @else
+                                    <a href="{{ route('pesan-tiket') }}?d={{ $destinasi->id }}" class="btn-pesan" tabindex="-1">Pesan Tiket</a>
+                                @endif
+                            </div>
                         </div>
                     @endforeach
 
@@ -370,8 +499,6 @@
     </div>
 </section>
 
-
-
 <!-- ===== TESTIMONI (baru) ===== -->
 <section class="jt-section jt-bg-soft">
     <div class="container">
@@ -439,17 +566,10 @@
         <div class="jt-cta-section jt-fade-up">
             <h2>Siap Berlibur?</h2>
             <p>Pesan tiket sekarang dan nikmati pengalaman wisata terbaik.</p>
-            <a href="{{ route('pesan-tiket') }}" class="jt-btn-cta">Pesan Sekarang</a>
+            <a href="{{ route('destinasi') }}" class="jt-btn-cta">Pesan Sekarang</a>
         </div>
     </div>
 </section>
-
-{{--
-    Footer khusus "jt-footer" DIHAPUS di sini karena layouts/app.blade.php sudah
-    menyediakan footer (class "footer-tasik") yang tampil di semua halaman, termasuk
-    beranda ini. Kalau ingin menu Menu/Maps ada di footer sitewide, tambahkan langsung
-    di layouts/app.blade.php, bukan di file ini, supaya konsisten di semua halaman.
---}}
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {

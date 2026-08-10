@@ -5,15 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Destinasi;
 use App\Models\Atraksi;
 use Illuminate\Http\Request;
-use app\Models\Ulasan;
+use App\Models\Ulasan;
+
 class DestinasiController extends Controller
 {
     public function beranda()
     {
-        $destinasiUnggulan = Destinasi::latest()->get();
-        $atraksiUnggulan   = Atraksi::latest()->take(6)->get(); // batasi 6 biar beranda tidak kepanjangan
+        // Tidak ada kolom "unggulan" di tabel destinasi, jadi ambil 6 terbaru
+        $destinasiUnggulan = Destinasi::latest()->take(6)->get();
 
-        return view('beranda', compact('destinasiUnggulan', 'atraksiUnggulan'));
+        return view('beranda', compact('destinasiUnggulan'));
     }
 
     public function index(Request $request)
@@ -24,16 +25,21 @@ class DestinasiController extends Controller
                 $query->where('nama', 'like', '%' . $keyword . '%');
             })
             ->latest()
-            ->paginate(2);
+            ->paginate(9);
 
         return view('destinasi', compact('destinasiList', 'keyword'));
     }
 
     public function show($id)
     {
-     $destinasi = Destinasi::with('atraksi')->findOrFail($id);
-        $destinasi = Destinasi::findOrFail($id);
-        return view('destinasi-detail', compact('destinasi'));
+        $destinasi = Destinasi::with(['atraksi', 'galeri'])->findOrFail($id);
+
+        $destinasiLain = Destinasi::where('id', '!=', $destinasi->id)
+            ->inRandomOrder()
+            ->take(4)
+            ->get();
+
+        return view('destinasi-detail', compact('destinasi', 'destinasiLain'));
     }
 
     public function create()
@@ -41,14 +47,14 @@ class DestinasiController extends Controller
         return view('destinasi-create');
     }
 
-    protected function rules(): array
+    public function store(Request $request)
     {
-        return [
+        $validated = $request->validate([
             'nama'         => 'required|string|min:2|max:255',
             'deskripsi'    => 'required|string',
-            'gambar'       => 'required|string|min:2|max:255',
+            'gambar'       => 'nullable|image|max:2048',
             'jam_buka'     => 'required|date_format:H:i',
-            'jam_tutup'    => 'required|date_format:H:i|after:jam_buka',
+            'jam_tutup'    => 'required|date_format:H:i',
             'lokasi'       => 'nullable|string|max:255',
             'harga_dewasa' => 'required|integer|min:0',
             'harga_anak'   => 'required|integer|min:0',
@@ -56,12 +62,7 @@ class DestinasiController extends Controller
             'kuota_dewasa' => 'required|integer|min:0',
             'kuota_anak'   => 'required|integer|min:0',
             'kuota_asing'  => 'required|integer|min:0',
-        ];
-    }
-
-    public function store(Request $request)
-    {
-        $validated = $request->validate($this->rules());
+        ]);
 
         $destinasi = Destinasi::create($validated);
 
@@ -78,7 +79,21 @@ class DestinasiController extends Controller
     public function update(Request $request, $id)
     {
         $destinasi = Destinasi::findOrFail($id);
-        $validated = $request->validate($this->rules());
+
+        $validated = $request->validate([
+            'nama'         => 'required|string|min:2|max:255',
+            'deskripsi'    => 'required|string',
+            'gambar'       => 'nullable|image|max:2048',
+            'jam_buka'     => 'required|date_format:H:i',
+            'jam_tutup'    => 'required|date_format:H:i',
+            'lokasi'       => 'nullable|string|max:255',
+            'harga_dewasa' => 'required|integer|min:0',
+            'harga_anak'   => 'required|integer|min:0',
+            'harga_asing'  => 'required|integer|min:0',
+            'kuota_dewasa' => 'required|integer|min:0',
+            'kuota_anak'   => 'required|integer|min:0',
+            'kuota_asing'  => 'required|integer|min:0',
+        ]);
 
         if ($validated['kuota_dewasa'] < $destinasi->terisi_dewasa) {
             return back()->withErrors(['kuota_dewasa' => 'Kuota dewasa tidak boleh kurang dari yang sudah terisi (' . $destinasi->terisi_dewasa . ').'])->withInput();
@@ -89,6 +104,12 @@ class DestinasiController extends Controller
         if ($validated['kuota_asing'] < $destinasi->terisi_asing) {
             return back()->withErrors(['kuota_asing' => 'Kuota asing tidak boleh kurang dari yang sudah terisi (' . $destinasi->terisi_asing . ').'])->withInput();
         }
+        if ($request->hasFile('gambar')) {
+    $validated['gambar'] = $request->file('gambar')->store('destinasi', 'public');
+} else {
+    unset($validated['gambar']);
+}
+
 
         $destinasi->update($validated);
 
@@ -104,17 +125,17 @@ class DestinasiController extends Controller
         return redirect()->route('destinasi')
             ->with('success', 'Destinasi berhasil dihapus!');
     }
+
     public function admin(Request $request)
-{
-    $keyword = $request->input('cari');
+    {
+        $keyword = $request->input('cari');
 
-    $destinasiList = Destinasi::when($keyword, function ($query) use ($keyword) {
-            $query->where('nama', 'like', '%' . $keyword . '%');
-        })
-        ->latest()
-        ->get();
+        $destinasiList = Destinasi::when($keyword, function ($query) use ($keyword) {
+                $query->where('nama', 'like', '%' . $keyword . '%');
+            })
+            ->latest()
+            ->get();
 
-    return view('destinasi-admin', compact('destinasiList', 'keyword'));
-}
-
+        return view('destinasi-admin', compact('destinasiList', 'keyword'));
+    }
 }

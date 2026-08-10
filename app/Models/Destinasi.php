@@ -38,6 +38,11 @@ public function atraksi()
     return $this->hasMany(Atraksi::class);
 }
 
+public function galeri()
+{
+    return $this->hasMany(DestinasiGaleri::class, 'destinasi_id')->orderBy('urutan');
+}
+
     public function bookings()
 {
     return $this->hasMany(Booking::class);

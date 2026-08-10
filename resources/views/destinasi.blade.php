@@ -1,7 +1,7 @@
-@extends('layouts.app')
+
 @section('title', ' Wisata Tasikmalaya - Destinasi')
 @section('content')
-
+@extends('layouts.site')
 <?php
     date_default_timezone_set("Asia/Jakarta");
     $nama = "Wisata Tasikmalaya";
@@ -217,7 +217,7 @@
 
                         <div class="kartu">
                             <div class="kartu-img-wrap">
-                                <img src="{{ asset('images/' . $destinasi->gambar) }}" alt="Foto {{ $destinasi->nama }}">
+                                <img src="{{ asset('storage/' . $destinasi->gambar) }}" alt="Foto {{ $destinasi->nama }}">
                                 <span class="badge-status {{ $destinasi->is_buka ? 'buka' : 'tutup' }}">
                                     <span class="badge-dot"></span> {{ $destinasi->is_buka ? 'Sedang buka' : 'Sedang tutup' }}
                                 </span>
@@ -266,7 +266,7 @@
 
                         <div class="kartu" aria-hidden="true">
                             <div class="kartu-img-wrap">
-                                <img src="{{ asset('images/' . $destinasi->gambar) }}" alt="Foto {{ $destinasi->nama }}">
+                                <img src="{{ asset('storage/' . $destinasi->gambar) }}" alt="Foto {{ $destinasi->nama }}">
                                 <span class="badge-status {{ $destinasi->is_buka ? 'buka' : 'tutup' }}">
                                     <span class="badge-dot"></span> {{ $destinasi->is_buka ? 'Sedang buka' : 'Sedang tutup' }}
                                 </span>

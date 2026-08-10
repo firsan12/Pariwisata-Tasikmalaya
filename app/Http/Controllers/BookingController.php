@@ -165,4 +165,12 @@ class BookingController extends Controller
         return redirect()->route('pembayaran.show', $booking->kode_booking)
             ->with('info', 'Terima kasih, klaim pembayaran Anda sedang diverifikasi oleh admin.');
     }
+
+    public function create(Request $request)
+{
+    $destinasiId = $request->query('d');
+    $destinasi = $destinasiId ? Destinasi::find($destinasiId) : null;
+
+    return view('pesan-tiket', compact('destinasi'));
+}
 }

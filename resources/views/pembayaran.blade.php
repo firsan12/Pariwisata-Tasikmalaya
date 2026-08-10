@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.site')
 @section('title', 'Wisata Tasikmalaya - Pembayaran')
 @section('content')
 
