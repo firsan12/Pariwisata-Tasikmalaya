@@ -19,7 +19,8 @@ class Destinasi extends Model
     'jam_buka',
     'jam_tutup',
     'lokasi',
-
+    'latitude',   // ← tambahkan
+    'longitude',  // ← tambahkan
     'harga_dewasa',
     'harga_anak',
     'harga_asing',

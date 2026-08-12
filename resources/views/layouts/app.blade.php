@@ -39,7 +39,7 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
 
         <style>
-            .app-header-bar{background:linear-gradient(135deg,#0d3b7a,#123d7a 55%,#4a90c2);padding:2.25rem 0 2rem;}
+           .app-header-bar{background:linear-gradient(135deg,#0ea5e9,#38bdf8 55%,#7dd3fc);padding:2.25rem 0 2rem;}
             .app-header-bar .breadcrumb-app .breadcrumb-item a{color:rgba(255,255,255,.8);text-decoration:none;font-weight:500;}
             .app-header-bar .breadcrumb-app .breadcrumb-item a:hover{color:#fff;}
             .app-header-bar .breadcrumb-app .breadcrumb-item.active{color:#fff;font-weight:600;}
@@ -159,5 +159,7 @@
             });
         </script>
 
+        @stack('scripts')
+
     </body>
-</html>
+</html> 

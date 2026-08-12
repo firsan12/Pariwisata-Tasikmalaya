@@ -14,8 +14,14 @@
         "seabank" => "SeaBank",
     );
 
-    $rekening_seabank = array("nomor" => "901287295755", "nama" => "Firman Khoerul Ihsan");
-    $nomor_ewallet_tujuan = "081261604202";
+    // Nomor rekening & e-wallet tujuan sekarang dari ProfilSitus (tabel
+    // profil_situs), fallback ke nilai lama kalau datanya belum di-seed.
+    $adaProfilPesan = isset($profilSitus) && $profilSitus->id;
+    $rekening_seabank = array(
+        "nomor" => $adaProfilPesan && $profilSitus->rekening_seabank_nomor ? $profilSitus->rekening_seabank_nomor : "901287295755",
+        "nama"  => $adaProfilPesan && $profilSitus->rekening_seabank_nama ? $profilSitus->rekening_seabank_nama : "Firman Khoerul Ihsan",
+    );
+    $nomor_ewallet_tujuan = $adaProfilPesan && $profilSitus->ewallet_tujuan_nomor ? $profilSitus->ewallet_tujuan_nomor : "081261604202";
 
     $daftar_ewallet = array(
         "gopay"     => "GoPay",

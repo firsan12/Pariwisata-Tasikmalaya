@@ -56,7 +56,7 @@
                             mulai dari pegunungan hijau hingga pantai selatan yang memesona.
                         </p>
                         <div class="d-flex gap-2">
-                            <a href="https://wa.me/6281261604202" target="_blank" rel="noopener" class="footer-social" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                            <a href="https://wa.me/{{ $footerProfil->kontak_whatsapp ?? '6281261604202' }}" target="_blank" rel="noopener" class="footer-social" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
                             <a href="https://instagram.com" target="_blank" rel="noopener" class="footer-social" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
                             <a href="https://facebook.com" target="_blank" rel="noopener" class="footer-social" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
                             <a href="https://youtube.com" target="_blank" rel="noopener" class="footer-social" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
@@ -81,17 +81,17 @@
                             <li><a href="{{ route('destinasi') }}?cari=Gunung" class="footer-link"><i class="bi bi-chevron-right footer-icon"></i>Gunung</a></li>
                             <li><a href="{{ route('destinasi') }}?cari=Religi" class="footer-link"><i class="bi bi-chevron-right footer-icon"></i>Religi</a></li>
                             <li><a href="{{ route('destinasi') }}?cari=Budaya" class="footer-link"><i class="bi bi-chevron-right footer-icon"></i>Budaya</a></li>
-                            <li><a href="{{ route('destinasi') }}?cari=Kuliner" class="footer-link"><i class="bi bi-chevron-right footer-icon"></i>Kuliner</a></li>
+                            <li><a href="{{ route('kuliner') }}" class="footer-link"><i class="bi bi-chevron-right footer-icon"></i>Kuliner</a></li>
                         </ul>
                     </div>
 
                     <div class="col-12 col-md-3 footer-col" style="--delay:.3s">
                         <h6 class="text-white fw-bold mb-3">Kontak</h6>
                         <ul class="list-unstyled d-grid gap-2">
-                            <li class="footer-text"><i class="bi bi-geo-alt-fill footer-icon"></i>Dinas Pariwisata, Kota Tasikmalaya, Jawa Barat</li>
-                            <li><a href="mailto:firmanihsan13@gmail.com" class="footer-link"><i class="bi bi-envelope-fill footer-icon"></i>firmanihsan13@gmail.com</a></li>
-                            <li><a href="https://wa.me/6281261604202" target="_blank" rel="noopener" class="footer-link"><i class="bi bi-whatsapp footer-icon"></i>0812-6160-4202</a></li>
-                            <li class="footer-text"><i class="bi bi-clock-fill footer-icon"></i>Senin – Jumat, 08.00 – 16.00 WIB</li>
+                            <li class="footer-text"><i class="bi bi-geo-alt-fill footer-icon"></i>{{ $footerProfil->kontak_alamat ?? 'Dinas Pariwisata, Kota Tasikmalaya, Jawa Barat' }}</li>
+                            <li><a href="mailto:{{ $footerProfil->kontak_email ?? 'firmanihsan13@gmail.com' }}" class="footer-link"><i class="bi bi-envelope-fill footer-icon"></i>{{ $footerProfil->kontak_email ?? 'firmanihsan13@gmail.com' }}</a></li>
+                            <li><a href="https://wa.me/{{ $footerProfil->kontak_whatsapp ?? '6281261604202' }}" target="_blank" rel="noopener" class="footer-link"><i class="bi bi-whatsapp footer-icon"></i>{{ $footerProfil->kontak_whatsapp_display ?? '0812-6160-4202' }}</a></li>
+                            <li class="footer-text"><i class="bi bi-clock-fill footer-icon"></i>{{ $footerProfil->kontak_jam_operasional ?? 'Senin – Jumat, 08.00 – 16.00 WIB' }}</li>
                         </ul>
                     </div>
                 </div>
@@ -109,7 +109,7 @@
             <i class="bi bi-arrow-up"></i>
         </button>
 
-        <script>
+      <script>
             const navbarTasik = document.getElementById('navbarTasik');
             if (navbarTasik) {
                 const toggleNavbarScrolled = function () {
@@ -131,6 +131,8 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         </script>
+
+        @stack('scripts')
 
     </body>
 </html>

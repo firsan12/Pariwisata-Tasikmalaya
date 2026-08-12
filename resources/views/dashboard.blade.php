@@ -470,8 +470,8 @@
     <style>
 
         :root {
-            --primary: #0d3b7a;
-            --primary-dark: #082b5c;
+    --primary: #0ea5e9;
+    --primary-dark: #0369a1;
             --blue: #2563eb;
             --green: #16a34a;
             --orange: #ea580c;
@@ -543,20 +543,19 @@
         /* HERO */
 
         .welcome-section {
-            position: relative;
-            overflow: hidden;
-            max-width: 1280px;
-            margin: 0 auto 32px;
-            min-height: 260px;
-            padding: 42px;
-            border-radius: 24px;
-            background:
-                linear-gradient(110deg, rgba(6,35,77,.95), rgba(13,59,122,.82)),
-                url('/images/dashboard-wisata.jpg') center/cover;
-            box-shadow: 0 18px 40px rgba(13,59,122,.18);
-            color: white;
-        }
-
+    position: relative;
+    overflow: hidden;
+    max-width: 1280px;
+    margin: 0 auto 32px;
+    min-height: 260px;
+    padding: 42px;
+    border-radius: 24px;
+    background:
+        linear-gradient(110deg, rgba(3,105,161,.92), rgba(14,165,233,.80)),
+        url('/images/dashboard-wisata.jpg') center/cover;
+    box-shadow: 0 18px 40px rgba(14,165,233,.22);
+    color: white;
+}
         .welcome-content {
             position: relative;
             z-index: 2;

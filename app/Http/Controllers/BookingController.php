@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\Destinasi;
+use App\Models\ProfilSitus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -106,8 +107,9 @@ class BookingController extends Controller
         }
 
         $batasWaktu = $booking->created_at->addMinutes($this->batasWaktuMenit);
+        $profilSitus = ProfilSitus::current();
 
-        return view('pembayaran', compact('booking', 'batasWaktu'));
+        return view('pembayaran', compact('booking', 'batasWaktu', 'profilSitus'));
     }
 
     /**
@@ -166,11 +168,22 @@ class BookingController extends Controller
             ->with('info', 'Terima kasih, klaim pembayaran Anda sedang diverifikasi oleh admin.');
     }
 
+
+    public function myTickets(Request $request)
+{
+    $bookings = Booking::with('destinasi')
+        ->where('email_pemesan', $request->user()->email)
+        ->orderByDesc('created_at')
+        ->get();
+
+    return view('tiket-saya', compact('bookings'));
+}
     public function create(Request $request)
 {
     $destinasiId = $request->query('d');
     $destinasi = $destinasiId ? Destinasi::find($destinasiId) : null;
+    $profilSitus = ProfilSitus::current();
 
-    return view('pesan-tiket', compact('destinasi'));
+    return view('pesan-tiket', compact('destinasi', 'profilSitus'));
 }
 }

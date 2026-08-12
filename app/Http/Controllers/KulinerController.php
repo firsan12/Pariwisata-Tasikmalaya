@@ -13,6 +13,54 @@ class KulinerController extends Controller
         return view('kuliner.index', compact('kuliners'));
     }
 
+    public function katalog(Request $request)
+    {
+        $query = Kuliner::query();
+
+        if ($request->filled('q')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('nama', 'like', '%'.$request->q.'%')
+                  ->orWhere('deskripsi', 'like', '%'.$request->q.'%')
+                  ->orWhere('alamat', 'like', '%'.$request->q.'%');
+            });
+        }
+
+        if ($request->filled('kategori')) {
+            $query->where('kategori', $request->kategori);
+        }
+
+        switch ($request->get('sort', 'nama')) {
+            case 'harga':
+                $query->orderBy('harga_mulai', 'asc');
+                break;
+            case 'harga_desc':
+                $query->orderBy('harga_mulai', 'desc');
+                break;
+            case 'nama_desc':
+                $query->orderBy('nama', 'desc');
+                break;
+            default:
+                $query->orderBy('nama', 'asc');
+        }
+
+        $kuliners = $query->paginate(12)->withQueryString();
+        $kategoris = Kuliner::whereNotNull('kategori')->distinct()->pluck('kategori');
+
+        return view('kuliner.katalog', compact('kuliners', 'kategoris'));
+    }
+
+   public function show(Kuliner $kuliner)
+{
+    $rekomendasi = Kuliner::where('id', '!=', $kuliner->id)
+        ->when($kuliner->kategori, function ($query) use ($kuliner) {
+            $query->where('kategori', $kuliner->kategori);
+        })
+        ->inRandomOrder()
+        ->limit(4)
+        ->get();
+
+    return view('kuliner.detail', compact('kuliner', 'rekomendasi'));
+}
     public function create()
     {
         return view('kuliner.create');
@@ -26,6 +74,7 @@ class KulinerController extends Controller
             'alamat'      => 'nullable|string|max:255',
             'foto'        => 'nullable|image|max:2048',
             'harga_mulai' => 'nullable|numeric',
+            'kategori'    => 'nullable|string|max:255',
         ]);
 
         if ($request->hasFile('foto')) {
@@ -37,22 +86,20 @@ class KulinerController extends Controller
         return redirect()->route('kuliner')->with('success', 'Kuliner berhasil ditambahkan.');
     }
 
-    public function edit($id)
+    public function edit(Kuliner $kuliner)
     {
-        $kuliner = Kuliner::findOrFail($id);
         return view('kuliner.edit', compact('kuliner'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Kuliner $kuliner)
     {
-        $kuliner = Kuliner::findOrFail($id);
-
         $validated = $request->validate([
             'nama'        => 'required|string|max:255',
             'deskripsi'   => 'nullable|string',
             'alamat'      => 'nullable|string|max:255',
             'foto'        => 'nullable|image|max:2048',
             'harga_mulai' => 'nullable|numeric',
+            'kategori'    => 'nullable|string|max:255',
         ]);
 
         if ($request->hasFile('foto')) {
@@ -64,9 +111,9 @@ class KulinerController extends Controller
         return redirect()->route('kuliner')->with('success', 'Kuliner berhasil diperbarui.');
     }
 
-    public function destroy($id)
+    public function destroy(Kuliner $kuliner)
     {
-        Kuliner::findOrFail($id)->delete();
+        $kuliner->delete();
         return redirect()->route('kuliner')->with('success', 'Kuliner berhasil dihapus.');
     }
 }

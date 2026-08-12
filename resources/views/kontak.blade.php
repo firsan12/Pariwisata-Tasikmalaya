@@ -2,6 +2,27 @@
 @section('title', 'Wisata Tasikmalaya - Kontak')
 @section('content')
 
+{{--
+    Info kontak (email, whatsapp, alamat, jam operasional) sekarang datang
+    dari KontakController (tabel profil_situs). Variabel di bawah ini hanya
+    fallback kalau datanya belum di-seed.
+--}}
+@php
+    $adaProfil = isset($profilSitus) && $profilSitus->id;
+
+    $kontakJudul = $adaProfil && $profilSitus->kontak_judul ? $profilSitus->kontak_judul : 'Ada Pertanyaan atau Saran?';
+    $kontakIntro = $adaProfil && $profilSitus->kontak_intro ? $profilSitus->kontak_intro
+        : 'Kirimkan pesan Anda kepada kami, atau hubungi langsung lewat kontak di bawah ini.';
+
+    $kontakEmail = $adaProfil && $profilSitus->kontak_email ? $profilSitus->kontak_email : 'firmanihsan13@gmail.com';
+    $kontakWhatsapp = $adaProfil && $profilSitus->kontak_whatsapp ? $profilSitus->kontak_whatsapp : '6281261604202';
+    $kontakWhatsappDisplay = $adaProfil && $profilSitus->kontak_whatsapp_display ? $profilSitus->kontak_whatsapp_display : '0812-6160-4202';
+    $kontakAlamat = $adaProfil && $profilSitus->kontak_alamat ? $profilSitus->kontak_alamat : 'Dinas Pariwisata, Kota Tasikmalaya, Jawa Barat';
+    $kontakAlamatMapsUrl = $adaProfil && $profilSitus->kontak_alamat_maps_url ? $profilSitus->kontak_alamat_maps_url
+        : 'https://www.google.com/maps/search/?api=1&query=Dinas+Pariwisata+Kota+Tasikmalaya+Jawa+Barat';
+    $kontakJamOperasional = $adaProfil && $profilSitus->kontak_jam_operasional ? $profilSitus->kontak_jam_operasional : 'Senin – Jumat, 08.00 – 16.00 WIB';
+@endphp
+
 <section class="kontak-section py-5">
     <div class="kontak-bg"></div>
 
@@ -10,9 +31,9 @@
         {{-- Bagian 1: Judul & Pengantar --}}
         <div class="text-center mb-5">
             <span class="kontak-label">Hubungi Kami</span>
-            <h2 class="text-white">Ada Pertanyaan atau Saran?</h2>
+            <h2 class="text-white">{{ $kontakJudul }}</h2>
             <p class="kontak-intro mx-auto">
-                Kirimkan pesan Anda kepada kami, atau hubungi langsung lewat kontak di bawah ini.
+                {{ $kontakIntro }}
             </p>
         </div>
 
@@ -27,7 +48,7 @@
                         <span class="kontak-icon"><i class="bi bi-envelope-fill"></i></span>
                         <div>
                             <h6>Email</h6>
-                            <p><a href="mailto:firmanihsan13@gmail.com">firmanihsan13@gmail.com</a></p>
+                            <p><a href="mailto:{{ $kontakEmail }}">{{ $kontakEmail }}</a></p>
                         </div>
                     </div>
 
@@ -35,7 +56,7 @@
                         <span class="kontak-icon"><i class="bi bi-whatsapp"></i></span>
                         <div>
                             <h6>WhatsApp</h6>
-                            <p><a href="https://wa.me/6281261604202" target="_blank" rel="noopener">0812-6160-4202</a></p>
+                            <p><a href="https://wa.me/{{ $kontakWhatsapp }}" target="_blank" rel="noopener">{{ $kontakWhatsappDisplay }}</a></p>
                         </div>
                     </div>
 
@@ -44,8 +65,8 @@
                         <div>
                             <h6>Alamat</h6>
                             <p>
-                                <a href="https://www.google.com/maps/search/?api=1&query=Dinas+Pariwisata+Kota+Tasikmalaya+Jawa+Barat" target="_blank" rel="noopener">
-                                    Dinas Pariwisata, Kota Tasikmalaya, Jawa Barat
+                                <a href="{{ $kontakAlamatMapsUrl }}" target="_blank" rel="noopener">
+                                    {{ $kontakAlamat }}
                                 </a>
                             </p>
                         </div>
@@ -55,7 +76,7 @@
                         <span class="kontak-icon"><i class="bi bi-clock-fill"></i></span>
                         <div>
                             <h6>Jam Operasional</h6>
-                            <p>Senin – Jumat, 08.00 – 16.00 WIB</p>
+                            <p>{{ $kontakJamOperasional }}</p>
                         </div>
                     </div>
                 </div>
@@ -99,8 +120,8 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const nomorWhatsapp = '6281261604202'; // format internasional tanpa "+" atau "0" di depan
-    const emailTujuan   = 'firmanihsan13@gmail.com';
+    const nomorWhatsapp = '{{ $kontakWhatsapp }}'; // format internasional tanpa "+" atau "0" di depan
+    const emailTujuan   = '{{ $kontakEmail }}';
 
     const namaInput  = document.getElementById('nama');
     const emailInput = document.getElementById('email');

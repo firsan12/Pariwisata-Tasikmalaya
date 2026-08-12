@@ -127,7 +127,35 @@
                             placeholder="contoh: Kecamatan Siak, Kabupaten Siak"
                         >
                     </div>
-<div class="tasik-row-2" style="grid-template-columns: repeat(3, 1fr);">
+
+                    <div class="tasik-row-2">
+                        <div class="tasik-field">
+                            <label for="latitude" class="tasik-label"><i class="bi bi-pin-map"></i> Latitude</label>
+                            <input
+                                type="text"
+                                class="tasik-input"
+                                id="latitude"
+                                name="latitude"
+                                value="{{ old('latitude') }}"
+                                placeholder="-7.3274"
+                            >
+                            <div class="tasik-hint">Ambil dari Google Maps: klik kanan lokasi → klik koordinat untuk copy.</div>
+                        </div>
+                        <div class="tasik-field">
+                            <label for="longitude" class="tasik-label"><i class="bi bi-pin-map"></i> Longitude</label>
+                            <input
+                                type="text"
+                                class="tasik-input"
+                                id="longitude"
+                                name="longitude"
+                                value="{{ old('longitude') }}"
+                                placeholder="108.2207"
+                            >
+                            <div class="tasik-hint">Angka kedua dari koordinat Google Maps.</div>
+                        </div>
+                    </div>
+
+                    <div class="tasik-row-2" style="grid-template-columns: repeat(3, 1fr);">
                         <div class="tasik-field">
                             <label class="tasik-label"><i class="bi bi-person"></i> Harga Dewasa (Rp)</label>
                             <input type="number" class="tasik-input" name="harga_dewasa" min="0" value="{{ old('harga_dewasa', 0) }}" required>
@@ -156,7 +184,7 @@
                             <input type="number" class="tasik-input" name="kuota_asing" min="0" value="{{ old('kuota_asing', 0) }}" required>
                         </div>
                     </div>
-                    
+
                     <div class="tasik-actions">
                         <button type="submit" class="tasik-btn tasik-btn-primary">
                             <i class="bi bi-check2-circle"></i> Simpan Destinasi

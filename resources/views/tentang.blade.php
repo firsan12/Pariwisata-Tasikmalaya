@@ -1,8 +1,25 @@
 <?php
-    // Path gambar hero & section "Tentang" — ganti di sini saja kalau mau pakai foto lain
-    // Pastikan nama file PERSIS sama (huruf besar/kecil) dengan yang ada di folder /images
-    $gambar_hero    = 'pantai-karang-tawulan.jpeg';
-    $gambar_tentang = 'tata-letak4.jpg';
+    // Konten halaman Tentang sekarang dari TentangController (tabel
+    // profil_situs). Nilai di bawah ini hanya fallback kalau datanya
+    // belum di-seed, supaya halaman tetap aman ditampilkan.
+    $adaProfil = isset($profilSitus) && $profilSitus->id;
+
+    $gambar_hero    = $adaProfil && $profilSitus->tentang_gambar_hero ? $profilSitus->tentang_gambar_hero : 'pantai-karang-tawulan.jpeg';
+    $gambar_tentang = $adaProfil && $profilSitus->tentang_gambar ? $profilSitus->tentang_gambar : 'tata-letak4.jpg';
+
+    $heroDeskripsi = $adaProfil && $profilSitus->tentang_hero_deskripsi ? $profilSitus->tentang_hero_deskripsi
+        : 'Daerah ini dikenal dengan keindahan alamnya yang masih asri, dipadukan dengan kekayaan budaya lokal yang diwariskan turun-temurun.';
+
+    $tentangJudul = $adaProfil && $profilSitus->tentang_judul ? $profilSitus->tentang_judul : 'Sepenggal Cerita dari Tanah Tasikmalaya';
+    $tentangIntro = $adaProfil && $profilSitus->tentang_intro ? $profilSitus->tentang_intro
+        : 'Daerah ini dikenal dengan keindahan alamnya yang masih asri, dipadukan dengan kekayaan budaya lokal yang diwariskan turun-temurun.';
+
+    $tentangSublabel  = $adaProfil && $profilSitus->tentang_sublabel ? $profilSitus->tentang_sublabel : 'Kekayaan Alam & Budaya';
+    $tentangSubjudul  = $adaProfil && $profilSitus->tentang_subjudul ? $profilSitus->tentang_subjudul : 'Jejak Alam yang Tak Lekang Waktu';
+    $tentangDeskripsi1 = $adaProfil && $profilSitus->tentang_deskripsi_1 ? $profilSitus->tentang_deskripsi_1
+        : 'Berbagai destinasi wisata alam, sejarah, dan kuliner siap menyambut setiap wisatawan yang berkunjung. Dari kawah gunung yang megah, kampung adat yang masih menjaga tradisi leluhur, hingga pantai dengan pemandangan matahari terbenam yang memukau.';
+    $tentangDeskripsi2 = $adaProfil && $profilSitus->tentang_deskripsi_2 ? $profilSitus->tentang_deskripsi_2
+        : 'Kami berkomitmen menjaga kelestarian alam sekaligus memperkenalkan budaya lokal kepada generasi masa kini.';
 ?>
 
 @extends('layouts.site')
@@ -18,7 +35,7 @@
         <span class="destinasi-label">Kenali Kami</span>
         <h1 class="fw-bold mb-3">Tentang Daerah Kami</h1>
         <p class="lead mx-auto" style="max-width: 600px;">
-            Daerah ini dikenal dengan keindahan alamnya yang masih asri, dipadukan dengan kekayaan budaya lokal yang diwariskan turun-temurun.
+            {{ $heroDeskripsi }}
         </p>
     </div>
 </section>
@@ -36,9 +53,9 @@
         {{-- Bagian 1: Judul & Pengantar --}}
         <div class="text-center mb-5 tentang-fade">
             <span class="tentang-label">Kenali Kami</span>
-            <h2 class="tentang-judul">Sepenggal Cerita dari Tanah Tasikmalaya</h2>
+            <h2 class="tentang-judul">{{ $tentangJudul }}</h2>
             <p class="tentang-intro mx-auto">
-                Daerah ini dikenal dengan keindahan alamnya yang masih asri, dipadukan dengan kekayaan budaya lokal yang diwariskan turun-temurun.
+                {{ $tentangIntro }}
             </p>
         </div>
 
@@ -53,20 +70,22 @@
                 </div>
             </div>
             <div class="col-12 col-md-6">
-                <span class="tentang-sublabel">Kekayaan Alam & Budaya</span>
-                <h3 class="mb-3 tentang-subjudul">Jejak Alam yang Tak Lekang Waktu</h3>
+                <span class="tentang-sublabel">{{ $tentangSublabel }}</span>
+                <h3 class="mb-3 tentang-subjudul">{{ $tentangSubjudul }}</h3>
                 <p class="tentang-text">
-                    Berbagai destinasi wisata alam, sejarah, dan kuliner siap menyambut setiap wisatawan yang berkunjung. Dari kawah gunung yang megah, kampung adat yang masih menjaga tradisi leluhur, hingga pantai dengan pemandangan matahari terbenam yang memukau.
+                    {{ $tentangDeskripsi1 }}
                 </p>
                 <p class="tentang-text mb-0">
-                    Kami berkomitmen menjaga kelestarian alam sekaligus memperkenalkan budaya lokal kepada generasi masa kini.
+                    {{ $tentangDeskripsi2 }}
                 </p>
             </div>
         </div>
 
         {{-- Bagian 3: Kartu angka/statistik --}}
         <?php
-            $statistik = array(
+            // $statistik sekarang datang dari TentangController (tabel `statistik`).
+            // Array di bawah ini hanya fallback kalau datanya belum di-seed.
+            $statistik = (isset($statistik) && count($statistik) > 0) ? $statistik : array(
                 array("ikon" => "bi-map-fill", "angka" => "15+", "label" => "Destinasi Wisata"),
                 array("ikon" => "bi-houses-fill", "angka" => "8",   "label" => "Desa Wisata"),
                 array("ikon" => "bi-people-fill", "angka" => "50K+", "label" => "Pengunjung / Tahun"),
@@ -91,7 +110,9 @@
 
         {{-- Bagian 4: Visi & Misi --}}
         <?php
-            $visi_misi = array(
+            // $visi_misi sekarang datang dari TentangController (tabel `visi_misi`).
+            // Array di bawah ini hanya fallback kalau datanya belum di-seed.
+            $visi_misi = (isset($visi_misi) && count($visi_misi) > 0) ? $visi_misi : array(
                 array(
                     "ikon"  => "bi-bullseye",
                     "judul" => "Visi",

@@ -2,56 +2,17 @@
 @section('title', ' Wisata Tasikmalaya - Beranda')
 @section('content')
 
-<?php
-    date_default_timezone_set("Asia/Jakarta");
-    $nama = "Wisata Tasikmalaya";
-
-    // Sebelumnya: date("H.I.S") -- "I" (kapital) itu bukan menit, tapi status DST (0/1),
-    // jadi hasilnya bukan jam sungguhan. Dipakai hanya untuk sapaan di hero, jadi cukup
-    // ambil jam (0-23) sebagai angka.
-    $jamSekarang = (int) date("H");
-
-    if ($jamSekarang < 10) {
-        $ucapan  = "Selamat Pagi";
-        $tagline = "Udara Sejuk Menyambut Langkah Pertamamu";
-    } else if ($jamSekarang < 15) {
-        $ucapan  = "Selamat Siang";
-        $tagline = "Saatnya Menjelajah di Bawah Langit Tasikmalaya";
-    } else if ($jamSekarang < 18) {
-        $ucapan  = "Selamat Sore";
-        $tagline = "Senja Terbaik Menanti di Ujung Perjalanan";
-    } else {
-        $ucapan  = "Selamat Malam";
-        $tagline = "Kisah Perjalanan Dimulai dari Sini";
-    }
-?>
-
 {{--
     CATATAN DATA UNTUK SECTION BARU DI BAWAH:
     - $kategoriWisata : koleksi kategori wisata (fallback dummy jika belum dikirim dari controller)
     - $events         : koleksi event/promo (fallback dummy)
     - $testimonis     : koleksi testimoni (fallback dummy)
-    Section Hero, Tentang, dan Kontak TIDAK diubah — tetap memakai data & class CSS asli project
-    (hero-tasik-foto, tentang, kontak-section).
-
-    PEMBARUAN:
-    - Section "Destinasi Unggulan" SEKARANG DINAMIS PENUH, disamakan dengan kartu di
-      destinasi.blade.php: badge status buka/tutup, badge harga termurah, jam operasional,
-      info slot tiket (ket_slot / sisa_slot / persen_terisi) + progress bar, dan tombol
-      "Pesan Tiket" / "Tiket Habis" kondisional. Partial 'partials.destinasi-card' TIDAK
-      dipakai lagi di sini — markup kartu ditulis langsung (inline), persis pola di halaman
-      Destinasi, supaya kedua halaman konsisten.
-    - Layout diganti ke layouts.site (khusus halaman publik), karena layouts.app
-      adalah layout Breeze berbasis komponen (<x-app-layout>) untuk area dashboard,
-      dan tidak cocok dipakai lewat @extends.
-    - Footer "jt-footer" DIHAPUS karena layouts/site.blade.php sudah punya footer sendiri
-      (footer-tasik) yang tampil di semua halaman publik.
-    - Class "col-md-2-4" (tidak valid di Bootstrap) diganti "col-md-4 col-lg".
-    - Palet warna section baru (jt-*) disamakan dengan palet asli situs — navy #0d3b7a,
-      sky blue #4a90c2, aksen emas #D4A857 — menggantikan biru generik sebelumnya, supaya
-      menyatu dengan Hero/Destinasi/Tentang/Kontak dan tetap terkesan mewah.
-    - Section Statistik sekarang pakai latar gradient navy dengan kartu glass/frosted,
-      supaya transisi dari foto Hero tidak langsung "jatuh" ke putih polos.
+    - $profilSitus    : teks Hero & Kontak (dari tabel profil_situs, fallback teks lama)
+    - $berandaStatistik : kartu statistik animasi (dari tabel beranda_statistik, fallback dummy)
+    - $keunggulan     : poin "Mengapa Memilih Kami" (dari tabel keunggulan, fallback dummy)
+    - $destinasiPeta  : destinasi yang punya latitude/longitude, untuk peta interaktif (Leaflet)
+    Section Hero dan Kontak (ringkas) TETAP memakai class CSS & markup asli project
+    (hero-tasik-foto, kontak-section) — hanya teksnya sekarang dari database.
 --}}
 @php
     $kategoriList = $kategoriWisata ?? collect([
@@ -72,7 +33,33 @@
         ['nama'=>'Andi','isi'=>'Tempat wisatanya bagus dan terawat.'],
         ['nama'=>'Sinta','isi'=>'Pelayanan ramah, akan booking lagi lain kali.'],
     ]);
+
+    $statistikList = (isset($berandaStatistik) && count($berandaStatistik) > 0) ? $berandaStatistik : collect([
+        ['ikon'=>'bi-geo-alt-fill','nilai'=>15,'desimal'=>0,'suffix'=>null,'label'=>'Destinasi'],
+        ['ikon'=>'bi-people-fill','nilai'=>50000,'desimal'=>0,'suffix'=>'+','label'=>'Wisatawan'],
+        ['ikon'=>'bi-star-fill','nilai'=>4.8,'desimal'=>1,'suffix'=>null,'label'=>'Rating'],
+        ['ikon'=>'bi-ticket-perforated-fill','nilai'=>300,'desimal'=>0,'suffix'=>'+','label'=>'Tiket/Hari'],
+    ]);
+
+    $keunggulanList = (isset($keunggulan) && count($keunggulan) > 0) ? $keunggulan : collect([
+        ['ikon'=>'bi-check-circle-fill','judul'=>'Booking Online'],
+        ['ikon'=>'bi-lightning-charge-fill','judul'=>'Cepat'],
+        ['ikon'=>'bi-shield-lock-fill','judul'=>'Aman'],
+        ['ikon'=>'bi-star-fill','judul'=>'Rating Terpercaya'],
+        ['ikon'=>'bi-geo-alt-fill','judul'=>'Destinasi Lengkap'],
+        ['ikon'=>'bi-ticket-perforated-fill','judul'=>'Tiket Digital'],
+    ]);
+
+    $kontakJudul = (isset($profilSitus) && $profilSitus->kontak_judul) ? $profilSitus->kontak_judul : 'Ada Pertanyaan atau Saran?';
+    $kontakIntro = (isset($profilSitus) && $profilSitus->kontak_intro) ? $profilSitus->kontak_intro : 'Kirimkan pesan Anda kepada kami, atau hubungi langsung lewat kontak yang tersedia.';
+
+    $heroDeskripsi = (isset($profilSitus) && $profilSitus->hero_deskripsi) ? $profilSitus->hero_deskripsi
+        : 'Temukan wisata, kuliner, budaya, dan pengalaman terbaik di Tasikmalaya.';
+    $heroTrustDestinasi = (isset($profilSitus) && $profilSitus->hero_trust_destinasi) ? $profilSitus->hero_trust_destinasi : '🗺️ 15+ Destinasi Pilihan';
+    $heroTrustWisatawan = (isset($profilSitus) && $profilSitus->hero_trust_wisatawan) ? $profilSitus->hero_trust_wisatawan : '⭐ Dipercaya 50K+ Wisatawan Setiap Tahun';
 @endphp
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
 <style>
     /* ===== Marquee Destinasi (geser otomatis tanpa henti) — TIDAK DIUBAH ===== */
@@ -153,9 +140,6 @@
 
     /* =====================================================================
        SECTION BARU — dinamespace "jt-" agar tidak bentrok dengan CSS project.
-       Palet disamakan dengan palet asli situs (lihat style.css):
-       navy #0d3b7a, sky blue #4a90c2, light blue #a8d8f0, tambah aksen emas
-       untuk kesan mewah.
        ===================================================================== */
     :root{
         --jt-primary:#0d3b7a; --jt-primary-dark:#092a58; --jt-secondary:#4a90c2;
@@ -174,7 +158,6 @@
     .jt-fade-up{ opacity:0; transform:translateY(40px); transition:all .8s cubic-bezier(.2,.8,.2,1); }
     .jt-fade-up.jt-in-view{ opacity:1; transform:translateY(0); }
 
-    /* ===== Statistik — latar gradient navy + kartu glass/frosted ===== */
     .jt-section-navy{
         position:relative;
         overflow:hidden;
@@ -197,7 +180,6 @@
     .jt-stat-card .jt-num{ font-size:2.2rem; font-weight:800; color:#ffffff; }
     .jt-stat-card .jt-label{ color:#dceaf5; font-size:.9rem; }
 
-    /* Kategori */
     .jt-kategori-card{
         background:#fff; border-radius:20px; padding:36px 16px; text-align:center; cursor:pointer;
         box-shadow:0 8px 20px rgba(13,59,122,.08); border-top:3px solid transparent;
@@ -207,12 +189,10 @@
     .jt-kategori-card .jt-emoji{ font-size:2.4rem; margin-bottom:10px; display:block; }
     .jt-kategori-card .jt-nama{ font-weight:600; color:var(--jt-primary); }
 
-    /* Mengapa Memilih Kami */
     .jt-alasan-item{ display:flex; align-items:center; gap:16px; padding:20px 0; border-bottom:1px dashed #dbe6f0; }
     .jt-alasan-item i{ font-size:1.5rem; color:var(--jt-primary); width:44px; height:44px; border-radius:12px; background:#eaf1ff; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
     .jt-alasan-item .jt-judul{ font-weight:600; }
 
-    /* Event slider — gradient navy→sky-blue senada situs, badge emas */
     .jt-slider-track{ display:flex; gap:20px; overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:10px; scrollbar-width:none; }
     .jt-slider-track::-webkit-scrollbar{ display:none; }
     .jt-slider-track > *{ scroll-snap-align:start; flex-shrink:0; }
@@ -224,13 +204,11 @@
     .jt-slider-nav button{ width:38px; height:38px; border-radius:50%; border:1.5px solid #dbe6f0; background:#fff; color:var(--jt-primary); cursor:pointer; }
     .jt-slider-nav button:hover{ border-color:var(--jt-primary); color:var(--jt-primary); background:#eaf1ff; }
 
-    /* Testimoni — bintang & aksen emas */
     .jt-testi-card{ width:340px; background:#fff; border-radius:20px; box-shadow:var(--jt-shadow); padding:28px; border-top:3px solid var(--jt-accent); }
     .jt-testi-card .jt-stars{ color:var(--jt-accent); margin-bottom:12px; }
     .jt-testi-card p{ color:#475569; font-style:italic; margin-bottom:16px; }
     .jt-testi-card .jt-nama{ font-weight:700; color:var(--jt-primary); }
 
-    /* CTA — gradient navy→sky-blue senada Hero/Destinasi/Tentang */
     .jt-cta-section{
         background:
             radial-gradient(ellipse at center, rgba(0,0,0,0) 40%, rgba(9,42,88,.3) 100%),
@@ -242,31 +220,60 @@
     .jt-cta-section p{ opacity:.9; margin-bottom:26px; }
     .jt-btn-cta{ background:#fff; color:var(--jt-primary); font-weight:700; padding:15px 36px; border-radius:var(--jt-radius-btn); text-decoration:none; transition:.25s ease; display:inline-block; }
     .jt-btn-cta:hover{ transform:scale(1.04); color:var(--jt-primary-dark); }
+
+    /* ===== Peta interaktif "Explore Tasikmalaya" ===== */
+    .wt-peta-tasik {
+        width: 100%;
+        height: 480px;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(13,59,122,.12);
+        border: 1px solid #e2e8f0;
+    }
+
+    .wt-peta-marker i {
+        font-size: 32px;
+        color: #0d3b7a;
+        text-shadow: 0 2px 4px rgba(0,0,0,.25);
+    }
+
+    .leaflet-popup-content-wrapper {
+        border-radius: 12px;
+    }
 </style>
 
-<!-- ===== HERO (tidak diubah) ===== -->
+<!-- ===== HERO ===== -->
 <section class="hero-tasik-foto d-flex align-items-center text-center text-white">
     <div class="hero-overlay"></div>
 
     <div class="container position-relative hero-content" style="z-index: 2;">
-        <span class="hero-tagline"><?php echo $tagline; ?></span>
+        <span class="hero-tagline">Platform Wisata, Kuliner & Tiket</span>
 
         <h1 class="display-4 fw-bold mb-3 hero-judul">
-            <?php echo $ucapan; ?>, Selamat Datang di<br>
-            <span class="hero-nama"><?php echo $nama; ?></span>
+            Jelajahi Pesona <span class="hero-nama">Tasikmalaya</span>
         </h1>
 
         <p class="lead mx-auto hero-deskripsi" style="max-width: 620px;">
-            Di antara kabut pegunungan, kesunyian kampung adat, dan debur ombak yang memeluk karang —
-            keindahan Tasikmalaya menanti untuk diceritakan lewat langkahmu sendiri.
+            {{ $heroDeskripsi }}
         </p>
 
-        <a href="{{ route('destinasi') }}" class="btn-hero-cta">Mulai Perjalananmu ↓</a>
+        <form action="{{ route('destinasi') }}" method="GET" class="wt-hero-search mx-auto">
+            <i class="bi bi-search"></i>
+            <input type="text" name="cari" class="form-control border-0" placeholder="Cari destinasi, kuliner, atau pengalaman...">
+            <button type="submit" class="btn-hero-cta wt-hero-search-btn">Cari</button>
+        </form>
+
+        <div class="wt-hero-quicklinks">
+            <a href="{{ route('destinasi') }}"><span>🏔️</span> Wisata</a>
+            <a href="{{ route('kuliner') }}"><span>🍜</span> Kuliner</a>
+            <a href="{{ route('pesan-tiket') }}"><span>🎟️</span> Tiket</a>
+            <a href="{{ route('beranda') }}#event-promo"><span>🎉</span> Event</a>
+        </div>
 
         <div class="hero-trust">
-            <span>🗺️ 15+ Destinasi Pilihan</span>
+            <span>{{ $heroTrustDestinasi }}</span>
             <span class="hero-trust-dot">•</span>
-            <span>⭐ Dipercaya 50K+ Wisatawan Setiap Tahun</span>
+            <span>{{ $heroTrustWisatawan }}</span>
         </div>
     </div>
 
@@ -275,31 +282,30 @@
     </div>
 </section>
 
-<!-- ===== STATISTIK (baru) — latar navy + kartu glass, jembatan visual dari foto Hero ===== -->
+<!-- ===== STATISTIK ===== -->
 <section class="jt-section-navy">
     <div class="container">
         <div class="row g-4">
-            <div class="col-6 col-md-3 jt-fade-up">
-                <div class="jt-stat-card"><i class="bi bi-geo-alt-fill"></i>
-                    <div class="jt-num" data-jt-count="15">0</div><div class="jt-label">Destinasi</div></div>
-            </div>
-            <div class="col-6 col-md-3 jt-fade-up">
-                <div class="jt-stat-card"><i class="bi bi-people-fill"></i>
-                    <div class="jt-num" data-jt-count="50000" data-jt-suffix="+">0</div><div class="jt-label">Wisatawan</div></div>
-            </div>
-            <div class="col-6 col-md-3 jt-fade-up">
-                <div class="jt-stat-card"><i class="bi bi-star-fill"></i>
-                    <div class="jt-num" data-jt-count="4.8" data-jt-decimal="1">0</div><div class="jt-label">Rating</div></div>
-            </div>
-            <div class="col-6 col-md-3 jt-fade-up">
-                <div class="jt-stat-card"><i class="bi bi-ticket-perforated-fill"></i>
-                    <div class="jt-num" data-jt-count="300" data-jt-suffix="+">0</div><div class="jt-label">Tiket/Hari</div></div>
-            </div>
+            @foreach ($statistikList as $stat)
+                @php
+                    $statIkon    = is_array($stat) ? $stat['ikon'] : $stat->ikon;
+                    $statNilai   = is_array($stat) ? $stat['nilai'] : $stat->nilai;
+                    $statDesimal = is_array($stat) ? ($stat['desimal'] ?? 0) : $stat->desimal;
+                    $statSuffix  = is_array($stat) ? ($stat['suffix'] ?? '') : $stat->suffix;
+                    $statLabel   = is_array($stat) ? $stat['label'] : $stat->label;
+                @endphp
+                <div class="col-6 col-md-3 jt-fade-up">
+                    <div class="jt-stat-card"><i class="bi {{ $statIkon }}"></i>
+                        <div class="jt-num" data-jt-count="{{ $statNilai }}" data-jt-decimal="{{ $statDesimal }}" data-jt-suffix="{{ $statSuffix }}">0</div>
+                        <div class="jt-label">{{ $statLabel }}</div>
+                    </div>
+                </div>
+            @endforeach
         </div>
     </div>
 </section>
 
-<!-- ===== KATEGORI WISATA (baru) ===== -->
+<!-- ===== KATEGORI WISATA ===== -->
 <section class="jt-section jt-bg-soft">
     <div class="container">
         <div class="jt-head jt-fade-up">
@@ -319,7 +325,7 @@
     </div>
 </section>
 
-<!-- ===== DESTINASI UNGGULAN (dinamis penuh, mengikuti pola destinasi.blade.php) ===== -->
+<!-- ===== DESTINASI UNGGULAN ===== -->
 <section class="destinasi-section py-5">
     <div class="destinasi-bg"></div>
 
@@ -446,7 +452,65 @@
     </div>
 </section>
 
-<!-- ===== MENGAPA MEMILIH KAMI (baru) ===== -->
+<!-- ===== KULINER POPULER ===== -->
+<section class="py-5 wt-kuliner-section">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="destinasi-label">Cita Rasa Lokal</span>
+            <h2 class="fw-bold">Kuliner Populer</h2>
+            <p class="text-muted">Cicipi kelezatan khas Tasikmalaya</p>
+        </div>
+
+        @if (isset($kulinerPopuler) && count($kulinerPopuler) > 0)
+            <div class="row g-4">
+                @foreach ($kulinerPopuler as $kuliner)
+                    <div class="col-6 col-md-3">
+                        <a href="{{ route('kuliner') }}" class="wt-kuliner-card">
+                            <div class="wt-kuliner-img">
+                               <img src="{{ $kuliner->foto_url ?: asset('images/placeholder-kuliner.jpg') }}" alt="{{ $kuliner->nama }}" loading="lazy">
+                            </div>
+                            <div class="wt-kuliner-body">
+                                <h6>{{ $kuliner->nama }}</h6>
+                                <p class="wt-kuliner-alamat"><i class="bi bi-geo-alt"></i> {{ Str::limit($kuliner->alamat, 28) }}</p>
+                                <span class="wt-kuliner-harga">Mulai Rp{{ number_format($kuliner->harga_mulai, 0, ',', '.') }}</span>
+                            </div>
+                        </a>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <p class="text-center text-muted mb-0">Belum ada kuliner untuk ditampilkan.</p>
+        @endif
+
+        <div class="text-center mt-5">
+            <a href="{{ route('kuliner') }}" class="btn-lihat-semua">Lihat Semua Kuliner →</a>
+        </div>
+    </div>
+</section>
+
+<!-- ===== EXPLORE TASIKMALAYA — peta interaktif Leaflet ===== -->
+<section class="py-5 wt-explore-section">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="destinasi-label">Jelajahi Peta</span>
+            <h2 class="fw-bold">Explore Tasikmalaya</h2>
+            <p class="text-muted">Lihat sebaran destinasi di berbagai penjuru Tasikmalaya</p>
+        </div>
+
+        @if (isset($destinasiPeta) && $destinasiPeta->count() > 0)
+            <div id="peta-tasik" class="wt-peta-tasik"></div>
+        @else
+            <div class="wt-explore-placeholder">
+                <i class="bi bi-map"></i>
+                <p class="mb-1 fw-semibold">Peta belum tersedia</p>
+                <p class="text-muted mb-3">Koordinat destinasi belum ditambahkan. Sementara itu, jelajahi destinasi lewat daftar lengkap kami.</p>
+                <a href="{{ route('destinasi') }}" class="btn-lihat-semua">Lihat Daftar Destinasi →</a>
+            </div>
+        @endif
+    </div>
+</section>
+
+<!-- ===== MENGAPA MEMILIH KAMI ===== -->
 <section class="jt-section jt-bg-soft">
     <div class="container">
         <div class="jt-head jt-fade-up">
@@ -454,30 +518,20 @@
             <p>Alasan wisatawan mempercayakan liburannya bersama kami</p>
         </div>
         <div class="row">
-            <div class="col-md-4 jt-fade-up">
-                <div class="jt-alasan-item"><i class="bi bi-check-circle-fill"></i><div class="jt-judul">Booking Online</div></div>
-            </div>
-            <div class="col-md-4 jt-fade-up">
-                <div class="jt-alasan-item"><i class="bi bi-lightning-charge-fill"></i><div class="jt-judul">Cepat</div></div>
-            </div>
-            <div class="col-md-4 jt-fade-up">
-                <div class="jt-alasan-item"><i class="bi bi-shield-lock-fill"></i><div class="jt-judul">Aman</div></div>
-            </div>
-            <div class="col-md-4 jt-fade-up">
-                <div class="jt-alasan-item"><i class="bi bi-star-fill"></i><div class="jt-judul">Rating Terpercaya</div></div>
-            </div>
-            <div class="col-md-4 jt-fade-up">
-                <div class="jt-alasan-item"><i class="bi bi-geo-alt-fill"></i><div class="jt-judul">Destinasi Lengkap</div></div>
-            </div>
-            <div class="col-md-4 jt-fade-up">
-                <div class="jt-alasan-item"><i class="bi bi-ticket-perforated-fill"></i><div class="jt-judul">Tiket Digital</div></div>
-            </div>
+            @foreach ($keunggulanList as $item)
+                <div class="col-md-4 jt-fade-up">
+                    <div class="jt-alasan-item">
+                        <i class="bi {{ is_array($item) ? $item['ikon'] : $item->ikon }}"></i>
+                        <div class="jt-judul">{{ is_array($item) ? $item['judul'] : $item->judul }}</div>
+                    </div>
+                </div>
+            @endforeach
         </div>
     </div>
 </section>
 
-<!-- ===== EVENT / PROMO (baru) ===== -->
-<section class="jt-section">
+<!-- ===== EVENT / PROMO ===== -->
+<section class="jt-section" id="event-promo">
     <div class="container">
         <div class="jt-head jt-fade-up">
             <h2>Event &amp; Promo</h2>
@@ -488,7 +542,7 @@
                 <div class="jt-event-card jt-fade-up">
                     <span class="jt-promo-badge">{{ is_array($event) ? $event['promo'] : $event->promo }}</span>
                     <h5>{{ is_array($event) ? $event['judul'] : $event->judul }}</h5>
-                    <a href="#">Lihat</a>
+                    <a href="{{ route('event.detail', is_array($event) ? ($event['id'] ?? '#') : $event->id) }}">Lihat</a>
                 </div>
             @endforeach
         </div>
@@ -499,7 +553,7 @@
     </div>
 </section>
 
-<!-- ===== TESTIMONI (baru) ===== -->
+<!-- ===== TESTIMONI ===== -->
 <section class="jt-section jt-bg-soft">
     <div class="container">
         <div class="jt-head jt-fade-up">
@@ -522,16 +576,16 @@
     </div>
 </section>
 
-<!-- ===== KONTAK (ringkas) — TIDAK DIUBAH ===== -->
+<!-- ===== KONTAK (ringkas) ===== -->
 <section class="kontak-section py-5">
     <div class="kontak-bg"></div>
 
     <div class="container kontak-content position-relative" style="z-index: 2;">
         <div class="text-center mb-5">
             <span class="kontak-label">Hubungi Kami</span>
-            <h2 class="fw-bold text-white mb-2">Ada Pertanyaan atau Saran?</h2>
+            <h2 class="fw-bold text-white mb-2">{{ $kontakJudul }}</h2>
             <p class="kontak-intro mx-auto">
-                Kirimkan pesan Anda kepada kami, atau hubungi langsung lewat kontak yang tersedia.
+                {{ $kontakIntro }}
             </p>
         </div>
 
@@ -560,7 +614,7 @@
     </div>
 </section>
 
-<!-- ===== CTA BOOKING (baru) ===== -->
+<!-- ===== CTA BOOKING ===== -->
 <section class="jt-section">
     <div class="container">
         <div class="jt-cta-section jt-fade-up">
@@ -570,6 +624,8 @@
         </div>
     </div>
 </section>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -608,6 +664,39 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }, { threshold: 0.4 });
     jtCounters.forEach(function (el) { jtCounterObserver.observe(el); });
+
+    // Peta interaktif "Explore Tasikmalaya"
+    @if (isset($destinasiPeta) && $destinasiPeta->count() > 0)
+    var destinasiData = @json($destinasiPeta);
+    var petaEl = document.getElementById('peta-tasik');
+
+    if (petaEl && destinasiData.length > 0) {
+        var avgLat = destinasiData.reduce((sum, d) => sum + parseFloat(d.latitude), 0) / destinasiData.length;
+        var avgLng = destinasiData.reduce((sum, d) => sum + parseFloat(d.longitude), 0) / destinasiData.length;
+
+        var map = L.map('peta-tasik').setView([avgLat, avgLng], 11);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        var markerIcon = L.divIcon({
+            className: 'wt-peta-marker',
+            html: '<i class="bi bi-geo-alt-fill"></i>',
+            iconSize: [32, 32],
+            iconAnchor: [16, 32]
+        });
+
+        destinasiData.forEach(function (d) {
+            var marker = L.marker([parseFloat(d.latitude), parseFloat(d.longitude)], { icon: markerIcon }).addTo(map);
+            marker.bindPopup(
+                '<strong>' + d.nama + '</strong><br>' +
+                '<a href="/destinasi/' + d.id + '" style="color:#0d3b7a;font-weight:600;">Lihat Detail →</a>'
+            );
+        });
+    }
+    @endif
 });
 </script>
 

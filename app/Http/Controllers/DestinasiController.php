@@ -6,6 +6,13 @@ use App\Models\Destinasi;
 use App\Models\Atraksi;
 use Illuminate\Http\Request;
 use App\Models\Ulasan;
+use App\Models\EventPromo;
+use App\Models\KategoriWisata;
+use App\Models\Testimoni;
+use App\Models\ProfilSitus;
+use App\Models\BerandaStatistik;
+use App\Models\Keunggulan;
+use App\Models\Kuliner;
 
 class DestinasiController extends Controller
 {
@@ -14,7 +21,34 @@ class DestinasiController extends Controller
         // Tidak ada kolom "unggulan" di tabel destinasi, jadi ambil 6 terbaru
         $destinasiUnggulan = Destinasi::latest()->take(6)->get();
 
-        return view('beranda', compact('destinasiUnggulan'));
+        // Konten kategori/event/testimoni/statistik/keunggulan sekarang dari
+        // database (lihat BerandaContentSeeder, BerandaStatistikSeeder,
+        // KeunggulanSeeder). Blade tetap punya fallback array statis
+        // sehingga tidak error kalau tabelnya masih kosong.
+        $kategoriWisata    = KategoriWisata::orderBy('urutan')->get();
+        $events            = EventPromo::orderBy('urutan')->get();
+        $testimonis        = Testimoni::orderBy('urutan')->get();
+        $profilSitus       = ProfilSitus::current();
+        $berandaStatistik  = BerandaStatistik::orderBy('urutan')->get();
+        $keunggulan        = Keunggulan::orderBy('urutan')->get();
+        $kulinerPopuler    = Kuliner::latest()->take(4)->get();
+
+        // Semua destinasi yang sudah punya koordinat, untuk peta interaktif
+        $destinasiPeta = Destinasi::whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->get(['id', 'nama', 'latitude', 'longitude']);
+
+        return view('beranda', compact(
+            'destinasiUnggulan',
+            'kategoriWisata',
+            'events',
+            'testimonis',
+            'profilSitus',
+            'berandaStatistik',
+            'keunggulan',
+            'kulinerPopuler',
+            'destinasiPeta'
+        ));
     }
 
     public function index(Request $request)
@@ -56,6 +90,8 @@ class DestinasiController extends Controller
             'jam_buka'     => 'required|date_format:H:i',
             'jam_tutup'    => 'required|date_format:H:i',
             'lokasi'       => 'nullable|string|max:255',
+            'latitude'     => 'nullable|numeric|between:-90,90',
+            'longitude'    => 'nullable|numeric|between:-180,180',
             'harga_dewasa' => 'required|integer|min:0',
             'harga_anak'   => 'required|integer|min:0',
             'harga_asing'  => 'required|integer|min:0',
@@ -87,6 +123,8 @@ class DestinasiController extends Controller
             'jam_buka'     => 'required|date_format:H:i',
             'jam_tutup'    => 'required|date_format:H:i',
             'lokasi'       => 'nullable|string|max:255',
+            'latitude'     => 'nullable|numeric|between:-90,90',
+            'longitude'    => 'nullable|numeric|between:-180,180',
             'harga_dewasa' => 'required|integer|min:0',
             'harga_anak'   => 'required|integer|min:0',
             'harga_asing'  => 'required|integer|min:0',
@@ -105,11 +143,10 @@ class DestinasiController extends Controller
             return back()->withErrors(['kuota_asing' => 'Kuota asing tidak boleh kurang dari yang sudah terisi (' . $destinasi->terisi_asing . ').'])->withInput();
         }
         if ($request->hasFile('gambar')) {
-    $validated['gambar'] = $request->file('gambar')->store('destinasi', 'public');
-} else {
-    unset($validated['gambar']);
-}
-
+            $validated['gambar'] = $request->file('gambar')->store('destinasi', 'public');
+        } else {
+            unset($validated['gambar']);
+        }
 
         $destinasi->update($validated);
 

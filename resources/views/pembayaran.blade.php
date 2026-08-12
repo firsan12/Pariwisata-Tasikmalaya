@@ -9,8 +9,16 @@
         "bca" => "BCA Virtual Account", "bri" => "BRI Virtual Account",
         "mandiri" => "Mandiri Virtual Account", "bni" => "BNI Virtual Account", "seabank" => "SeaBank",
     );
-    $rekening_seabank = array("nomor" => "901287295755", "nama" => "Firman Khoerul Ihsan");
+
+    // Nomor rekening tujuan sekarang dari ProfilSitus (tabel profil_situs),
+    // fallback ke nilai lama kalau datanya belum di-seed.
+    $adaProfilBayar = isset($profilSitus) && $profilSitus->id;
+    $rekening_seabank = array(
+        "nomor" => $adaProfilBayar && $profilSitus->rekening_seabank_nomor ? $profilSitus->rekening_seabank_nomor : "901287295755",
+        "nama"  => $adaProfilBayar && $profilSitus->rekening_seabank_nama ? $profilSitus->rekening_seabank_nama : "Firman Khoerul Ihsan",
+    );
     $daftar_ewallet_label = array("gopay" => "GoPay", "ovo" => "OVO", "dana" => "DANA", "shopeepay" => "ShopeePay");
+    $nomor_ewallet_tujuan = $adaProfilBayar && $profilSitus->ewallet_tujuan_nomor ? $profilSitus->ewallet_tujuan_nomor : "081261604202";
     $gambar_qris_ewallet = "qris-nasional.jpg";
 
     // Semua logika QRIS dinamis & kode tiket real-time sekarang HANYA ada di
@@ -54,7 +62,18 @@
 
                     <div class="bayar-panel text-center" style="border-color:#2ecc71;">
                         <span class="bayar-label" style="color:#2ecc71;"><i class="bi bi-check-circle-fill"></i> Pembayaran Berhasil</span>
-                        <p class="bayar-sub">Dikonfirmasi pada <strong><?php echo $booking->dibayar_at->translatedFormat('d F Y, H:i:s'); ?> WIB</strong>.</p>
+                        <p class="bayar-sub">
+                            Dikonfirmasi pada
+                            <strong>
+                                <?php
+                                    // dibayar_at bisa saja null pada data lama/tidak konsisten,
+                                    // jadi jangan panggil translatedFormat() langsung di objek null.
+                                    echo $booking->dibayar_at
+                                        ? $booking->dibayar_at->translatedFormat('d F Y, H:i:s') . ' WIB'
+                                        : '-';
+                                ?>
+                            </strong>.
+                        </p>
                         <p class="bayar-jumlah">Total Dibayar: <strong>Rp <?php echo number_format($booking->total_harga, 0, ',', '.'); ?></strong></p>
                     </div>
 
@@ -128,7 +147,7 @@
                             </div>
                             <p class="bayar-sub mb-0">a.n. <strong>Firman Ihsan</strong></p>
                             <div class="va-box mt-2">
-                                <span id="ewalletNumber">081261604202</span>
+                                <span id="ewalletNumber"><?php echo $nomor_ewallet_tujuan; ?></span>
                                 <button type="button" class="btn-salin" onclick="salinEwallet()"><i class="bi bi-clipboard"></i> Salin</button>
                             </div>
                             <p class="bayar-jumlah mt-3">Total Transfer (kode unik <?php echo $booking->kode_unik; ?>): <strong>Rp <?php echo number_format($booking->total_transfer, 0, ',', '.'); ?></strong></p>

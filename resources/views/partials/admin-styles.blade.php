@@ -521,4 +521,64 @@
         }
     }
 
+    /* PAGINATION (Kelola Kuliner, dsb.) */
+
+    .kk-pagination {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        margin-top: 22px;
+    }
+
+    .kk-pagination-info {
+        color: var(--muted);
+        font-size: 13px;
+    }
+
+    .kk-pagination-info strong {
+        color: var(--text);
+    }
+
+    .kk-pagination-buttons {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        flex-wrap: wrap;
+    }
+
+    .kk-page {
+        width: 38px;
+        height: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: white;
+        color: var(--text);
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 12.5px;
+        transition: .2s ease;
+    }
+
+    .kk-page:hover {
+        border-color: #cbd8eb;
+        background: #f7f9fc;
+        color: var(--primary);
+    }
+
+    .kk-page.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+
+    .kk-page.disabled {
+        background: #f7f9fc;
+        color: #cbd5e1;
+        border-color: var(--border);
+        cursor: not-allowed;
+    }
+
 </style>
