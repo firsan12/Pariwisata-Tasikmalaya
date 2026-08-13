@@ -380,7 +380,7 @@
                                 <tr>
                                     <td>
                                         @if (!empty($destinasi->gambar))
-                                            <img src="{{ asset('images/' . $destinasi->gambar) }}"
+                                            <img src="{{ asset('storage/' . $destinasi->gambar) }}"
                                                  alt="{{ $destinasi->nama }}"
                                                  class="thumb-destinasi-admin"
                                                  onerror="this.src='https://via.placeholder.com/56?text=%20';">

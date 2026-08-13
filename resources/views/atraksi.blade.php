@@ -358,7 +358,7 @@
                         <div class="col-md-4">
                             <div class="kartu-atraksi">
                                 @if (!empty($atraksi->gambar))
-                                    <img src="{{ asset('images/' . $atraksi->gambar) }}"
+                                    <img src="{{ asset('storage/' . $atraksi->gambar) }}"
                                          alt="{{ $atraksi->nama }}"
                                          class="kartu-atraksi-img"
                                          onerror="this.onerror=null;this.replaceWith(Object.assign(document.createElement('div'),{className:'kartu-atraksi-img-placeholder',innerHTML:'<i class=&quot;bi bi-image&quot;></i>'}));">

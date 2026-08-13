@@ -23,7 +23,7 @@ class GaleriController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'destinasi_id' => 'nullable|exists:destinasis,id',
+            'destinasi_id' => 'nullable|exists:destinasi,id',
             'judul'        => 'required|string|max:255',
             'foto'         => 'required|image|max:2048',
             'keterangan'   => 'nullable|string',
@@ -48,7 +48,7 @@ class GaleriController extends Controller
         $galeri = Galeri::findOrFail($id);
 
         $validated = $request->validate([
-            'destinasi_id' => 'nullable|exists:destinasis,id',
+            'destinasi_id' => 'nullable|exists:destinasi,id',
             'judul'        => 'required|string|max:255',
             'foto'         => 'nullable|image|max:2048',
             'keterangan'   => 'nullable|string',

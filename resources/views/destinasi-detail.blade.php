@@ -114,6 +114,67 @@
     .atraksi-card .kategori-tag{ font-size:.75rem; font-weight:600; color:var(--primary); background:#eaf1f9; padding:3px 10px; border-radius:20px; }
     .atraksi-card .lihat-detail{ color:var(--primary); font-weight:600; font-size:.9rem; text-decoration:none; }
 
+    /* ===== MODAL DETAIL ATRAKSI (senada tema situs) ===== */
+    .modal-atraksi-detail .modal-content{
+        border: none;
+        border-radius: var(--radius-card);
+        overflow: hidden;
+        box-shadow: var(--shadow-soft);
+    }
+    .modal-atraksi-detail .modal-header{
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: #fff;
+        border-bottom: none;
+        padding: 1.5rem 1.75rem;
+    }
+    .modal-atraksi-detail .modal-title{
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+    }
+    .modal-atraksi-detail .btn-close{
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+    .modal-atraksi-detail .modal-body{
+        padding: 1.75rem;
+    }
+    .modal-atraksi-detail .modal-body img{
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+        border-radius: 14px;
+        display: block;
+        margin-bottom: 1rem;
+    }
+    .modal-atraksi-detail .harga-atraksi{
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: var(--primary);
+        margin: 0.6rem 0;
+    }
+    .modal-atraksi-detail .deskripsi-atraksi{
+        color: #475569;
+        line-height: 1.7;
+        margin-bottom: 0;
+    }
+    .modal-atraksi-detail .modal-footer{
+        border-top: 1px solid #eef1f5;
+        padding: 1rem 1.75rem 1.5rem;
+    }
+    .modal-atraksi-detail .btn-tutup-atraksi{
+        border: 1.5px solid #e5e7eb;
+        color: #6b7280;
+        font-weight: 600;
+        border-radius: 10px;
+        padding: 0.55rem 1.4rem;
+        background: #fff;
+        transition: all 0.2s ease;
+    }
+    .modal-atraksi-detail .btn-tutup-atraksi:hover{
+        background: #f9fafb;
+        border-color: #d1d5db;
+        color: #6b7280;
+    }
+
     /* ===== REVIEW ===== */
     .review-summary{ display:flex; align-items:center; gap:var(--sp-2); margin-bottom:var(--sp-3); }
     .review-summary .avg{ font-size:2.2rem; font-weight:800; }
@@ -308,14 +369,42 @@
                     @forelse ($destinasi->atraksi as $atraksi)
                         <div class="col-md-4">
                             <div class="atraksi-card">
-                                <img src="{{ asset('storage/' . $atraksi->gambar) }}">
+                                <img src="{{ asset('storage/' . $atraksi->gambar) }}" alt="{{ $atraksi->nama }}">
                                 <div class="body">
                                     <span class="kategori-tag">{{ $atraksi->kategori }}</span>
                                     <h6 class="mt-2 mb-1">{{ $atraksi->nama }}</h6>
                                     <div class="mb-2" style="color:var(--accent);">
                                         @for ($i=1;$i<=5;$i++)<i class="bi bi-star-fill"></i>@endfor
                                     </div>
-                                    <a href="#" class="lihat-detail">Lihat Detail →</a>
+                                    <div class="mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-primary"
+                                                data-bs-toggle="modal" data-bs-target="#modalAtraksi{{ $atraksi->id }}">
+                                            Lihat Detail
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Modal Detail Atraksi --}}
+                        <div class="modal fade modal-atraksi-detail" id="modalAtraksi{{ $atraksi->id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">{{ $atraksi->nama }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <img src="{{ asset('storage/' . $atraksi->gambar) }}" alt="{{ $atraksi->nama }}">
+                                        <span class="kategori-tag">{{ $atraksi->kategori }}</span>
+                                        <p class="harga-atraksi">
+                                            {{ $atraksi->harga == 0 ? 'Gratis' : 'Rp ' . number_format($atraksi->harga, 0, ',', '.') }}
+                                        </p>
+                                        <p class="deskripsi-atraksi">{{ $atraksi->deskripsi }}</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn-tutup-atraksi" data-bs-dismiss="modal">Tutup</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>

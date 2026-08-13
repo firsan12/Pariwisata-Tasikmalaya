@@ -61,6 +61,7 @@ class BookingController extends Controller
                 $kodeUnik  = random_int(100, 999);
 
                 $booking = Booking::create([
+                     'user_id'           => auth()->id(),   // <-- tambahkan baris ini
                     'kode_booking'      => Booking::generateKodeBooking(),
                     'destinasi_id'      => $destinasi->id,
                     'nama_pemesan'      => $validated['nama_pemesan'],
@@ -169,10 +170,15 @@ class BookingController extends Controller
     }
 
 
-    public function myTickets(Request $request)
+   public function myTickets(Request $request)
 {
+    $user = $request->user();
+
     $bookings = Booking::with('destinasi')
-        ->where('email_pemesan', $request->user()->email)
+        ->where(function ($q) use ($user) {
+            $q->where('user_id', $user->id)
+              ->orWhere('email_pemesan', $user->email);
+        })
         ->orderByDesc('created_at')
         ->get();
 

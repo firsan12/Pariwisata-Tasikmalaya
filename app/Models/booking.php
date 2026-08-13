@@ -10,13 +10,12 @@ class Booking extends Model
     use HasFactory;
 
     protected $fillable = [
-        'kode_booking', 'destinasi_id',
+        'user_id', 'kode_booking', 'destinasi_id',
         'nama_pemesan', 'email_pemesan', 'wa_pemesan', 'tanggal_kunjungan',
         'jumlah_dewasa', 'jumlah_anak', 'jumlah_asing',
         'subtotal_dewasa', 'subtotal_anak', 'subtotal_asing', 'total_harga',
         'metode_pembayaran', 'bank_kode', 'ewallet_kode', 'kode_unik', 'total_transfer',
         'status', 'dibayar_at',
-        // kolom untuk alur klaim & verifikasi pembayaran
         'klaim_bayar_at', 'bukti_transfer_path',
         'verified_by', 'verified_ip', 'alasan_ditolak',
         'dibatalkan_at',
@@ -37,6 +36,15 @@ class Booking extends Model
     public function destinasi()
     {
         return $this->belongsTo(Destinasi::class);
+    }
+
+    /**
+     * User pemilik booking ini (bisa null kalau dibuat sebagai tamu / guest checkout,
+     * atau booking lama sebelum kolom user_id ada).
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
     /**

@@ -207,16 +207,21 @@
                         <form action="{{ route('atraksi.store') }}" method="POST">
                             @csrf
 
-                            <select name="destinasi_id" class="form-select @error('destinasi_id') is-invalid @enderror">
-    <option value="" selected disabled>-- Pilih Destinasi --</option>
-    @foreach ($destinasiList as $destinasi)
-        <option value="{{ $destinasi->id }}"
-            {{ old('destinasi_id') == $destinasi->id ? 'selected' : '' }}>
-            {{ $destinasi->nama }}
-        </option>
-    @endforeach
-</select>
-
+                            <div class="mb-3">
+                                <label for="destinasi_id" class="form-atraksi-label">Destinasi</label>
+                                <select name="destinasi_id" id="destinasi_id" class="form-select form-atraksi-control @error('destinasi_id') is-invalid @enderror">
+                                    <option value="" selected disabled>-- Pilih Destinasi --</option>
+                                    @foreach ($destinasiList as $destinasi)
+                                        <option value="{{ $destinasi->id }}"
+                                            {{ old('destinasi_id') == $destinasi->id ? 'selected' : '' }}>
+                                            {{ $destinasi->nama }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('destinasi_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
 
                             <div class="mb-3">
                                 <label for="nama" class="form-atraksi-label">Nama Atraksi</label>
@@ -278,10 +283,13 @@
                                 <input type="text" name="gambar" id="gambar"
                                        class="form-control form-atraksi-control @error('gambar') is-invalid @enderror"
                                        value="{{ old('gambar') }}"
-                                       placeholder="contoh: tari-zapin.jpg">
+                                       placeholder="contoh: atraksi/tari-zapin.jpg">
                                 @error('gambar')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                                <div class="form-atraksi-hint">
+                                    Wajib sertakan folder <code>atraksi/</code> di depan nama file, sesuai lokasi file di <code>storage/atraksi/</code>. Nama harus sama persis (besar/kecil huruf & spasi).
+                                </div>
                             </div>
 
                             <div class="d-flex gap-2">

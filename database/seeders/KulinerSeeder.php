@@ -7,6 +7,92 @@ use App\Models\Kuliner;
 
 class KulinerSeeder extends Seeder
 {
+    /**
+     * Kata kunci foto (bahasa Inggris, untuk loremflickr) per jenis makanan.
+     * Dicocokkan dengan mencari potongan kata di nama menu (huruf kecil).
+     * Urutan penting — yang lebih spesifik ditaruh lebih dulu.
+     */
+    protected array $petaKataKunci = [
+        // PENTING: satu kata kunci UMUM saja per baris (tanpa koma, tanpa
+        // tanda hubung/hyphen). loremflickr menganggap kata yang dipisah
+        // koma sebagai "harus cocok SEMUA sekaligus" (AND), bukan salah
+        // satu — jadi kombinasi kata yang jarang/aneh sering tidak ada
+        // hasilnya (gambar patah). Kata umum tunggal jauh lebih pasti ada.
+        'sate'           => 'satay',
+        'bakso'          => 'meatball',
+        'soto'           => 'soup',
+        'mie kocok'      => 'noodles',
+        'mie'            => 'noodles',
+        'kwetiau'        => 'noodles',
+        'kopi'           => 'coffee',
+        'wedang'         => 'ginger',
+        'bandrek'        => 'ginger',
+        'bajigur'        => 'drink',
+        'es cendol'      => 'dessert',
+        'es dawet'       => 'dessert',
+        'es campur'      => 'fruit',
+        'es kelapa'      => 'coconut',
+        'es teh'         => 'tea',
+        'es '            => 'drink',
+        'kerupuk'        => 'cracker',
+        'keripik'        => 'chips',
+        'opak'           => 'cracker',
+        'rangginang'     => 'cracker',
+        'klepon'         => 'dessert',
+        'putu'           => 'dessert',
+        'wajit'          => 'dessert',
+        'colenak'        => 'dessert',
+        'peuyeum'        => 'cassava',
+        'combro'         => 'snack',
+        'misro'          => 'snack',
+        'cireng'         => 'snack',
+        'cilok'          => 'meatball',
+        'batagor'        => 'dumpling',
+        'siomay'         => 'dumpling',
+        'seblak'         => 'noodles',
+        'tahu gejrot'    => 'tofu',
+        'tahu'           => 'tofu',
+        'ayam goreng'    => 'chicken',
+        'ayam penyet'    => 'chicken',
+        'ayam'           => 'chicken',
+        'gurame'         => 'fish',
+        'lele'           => 'fish',
+        'ikan'           => 'fish',
+        'pisang goreng'  => 'banana',
+        'pisang molen'   => 'banana',
+        'pisang'         => 'banana',
+        'nasi goreng'    => 'rice',
+        'nasi kuning'    => 'rice',
+        'nasi'           => 'rice',
+        'lontong'        => 'rice',
+        'karedok'        => 'salad',
+        'lotek'          => 'salad',
+        'pecel'          => 'salad',
+        'surabi'         => 'pancake',
+        'donat'          => 'donut',
+        'bubur'          => 'porridge',
+        'sambal'         => 'chili',
+    ];
+
+    protected function fotoUntuk(string $nama, string $slug): string
+    {
+        $namaLower = mb_strtolower($nama);
+        $kataKunci = 'food'; // fallback — kata umum, pasti banyak hasilnya
+
+        foreach ($this->petaKataKunci as $kunci => $tag) {
+            if (str_contains($namaLower, $kunci)) {
+                $kataKunci = $tag;
+                break;
+            }
+        }
+
+        // lock dibuat dari slug supaya foto TETAP SAMA setiap dibuka lagi
+        // (tanpa lock, loremflickr kasih foto acak baru tiap request)
+        $lock = crc32($slug) % 100000;
+
+        return "https://loremflickr.com/1600/1000/{$kataKunci}?lock={$lock}";
+    }
+
     public function run(): void
     {
         $data = [
@@ -18,7 +104,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Makanan Khas',
                 'alamat' => 'Kota Tasikmalaya',
                 'harga_mulai' => 15000,
-                'foto' => 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -28,7 +113,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Makanan Khas',
                 'alamat' => 'Kota Tasikmalaya',
                 'harga_mulai' => 12000,
-                'foto' => 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -38,7 +122,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Makanan Tradisional',
                 'alamat' => 'Kota Tasikmalaya',
                 'harga_mulai' => 12000,
-                'foto' => 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -48,7 +131,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Makanan',
                 'alamat' => 'Kota Tasikmalaya',
                 'harga_mulai' => 15000,
-                'foto' => 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -58,7 +140,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Sarapan',
                 'alamat' => 'Kota Tasikmalaya',
                 'harga_mulai' => 10000,
-                'foto' => 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -68,7 +149,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Makanan',
                 'alamat' => 'Kota Tasikmalaya',
                 'harga_mulai' => 15000,
-                'foto' => 'https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -78,7 +158,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Mie & Bakso',
                 'alamat' => 'Kota Tasikmalaya',
                 'harga_mulai' => 15000,
-                'foto' => 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -88,7 +167,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Sate',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 25000,
-                'foto' => 'https://images.unsplash.com/photo-1529563021893-cc83c992d75d?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -98,7 +176,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Makanan Sunda',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 20000,
-                'foto' => 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -108,7 +185,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Makanan Sunda',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 18000,
-                'foto' => 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -118,7 +194,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Seafood',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 35000,
-                'foto' => 'https://images.unsplash.com/photo-1544943910-4c1dc44aab44?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -128,7 +203,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Seafood',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 35000,
-                'foto' => 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -138,7 +212,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Makanan Sunda',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 10000,
-                'foto' => 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -148,7 +221,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Makanan Sunda',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 10000,
-                'foto' => 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -158,7 +230,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Makanan Tradisional',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 10000,
-                'foto' => 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -168,7 +239,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Jajanan',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 5000,
-                'foto' => 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -178,7 +248,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Jajanan',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 5000,
-                'foto' => 'https://images.unsplash.com/photo-1625398407796-82650a8c0e7f?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -188,7 +257,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Jajanan',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 5000,
-                'foto' => 'https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -198,7 +266,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Jajanan Tradisional',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 3000,
-                'foto' => 'https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -208,7 +275,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Jajanan Tradisional',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 3000,
-                'foto' => 'https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -218,7 +284,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Oleh-Oleh',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 10000,
-                'foto' => 'https://images.unsplash.com/photo-1599599810694-57a4e7e2d6f8?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -228,7 +293,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Oleh-Oleh',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 12000,
-                'foto' => 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -238,7 +302,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Oleh-Oleh',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 15000,
-                'foto' => 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -248,7 +311,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Oleh-Oleh',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 15000,
-                'foto' => 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -258,7 +320,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Oleh-Oleh',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 15000,
-                'foto' => 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -268,7 +329,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Sambal',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 5000,
-                'foto' => 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -278,7 +338,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Makanan Sunda',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 18000,
-                'foto' => 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -288,7 +347,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Makanan',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 15000,
-                'foto' => 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -298,7 +356,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Jajanan',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 10000,
-                'foto' => 'https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -308,7 +365,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Mie',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 12000,
-                'foto' => 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -318,7 +374,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Mie',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 15000,
-                'foto' => 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -328,7 +383,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Jajanan',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 10000,
-                'foto' => 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -338,7 +392,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Jajanan',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 10000,
-                'foto' => 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -348,7 +401,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Jajanan',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 8000,
-                'foto' => 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -358,7 +410,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Jajanan',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 8000,
-                'foto' => 'https://images.unsplash.com/photo-1587132137056-bfbf0166836e?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -368,7 +419,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Jajanan Tradisional',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 7000,
-                'foto' => 'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -378,7 +428,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Jajanan Tradisional',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 10000,
-                'foto' => 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -388,7 +437,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Minuman',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 8000,
-                'foto' => 'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -398,7 +446,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Minuman',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 10000,
-                'foto' => 'https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -408,7 +455,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Minuman',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 10000,
-                'foto' => 'https://images.unsplash.com/photo-1525385133512-2f3bdd039054?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -418,7 +464,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Minuman',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 10000,
-                'foto' => 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -428,7 +473,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Minuman Tradisional',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 8000,
-                'foto' => 'https://images.unsplash.com/photo-1597318181409-cf64d0b5d8a2?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -438,7 +482,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Minuman Tradisional',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 8000,
-                'foto' => 'https://images.unsplash.com/photo-1571934811356-5cc061b6821f?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -448,7 +491,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Oleh-Oleh',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 10000,
-                'foto' => 'https://images.unsplash.com/photo-1621939514649-280e2aa1f2f5?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -458,7 +500,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Oleh-Oleh',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 12000,
-                'foto' => 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -468,7 +509,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Oleh-Oleh',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 10000,
-                'foto' => 'https://images.unsplash.com/photo-1599599810694-57a4e7e2d6f8?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -478,7 +518,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Oleh-Oleh',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 15000,
-                'foto' => 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -488,7 +527,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Jajanan',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 8000,
-                'foto' => 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -498,7 +536,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Sarapan',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 10000,
-                'foto' => 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -508,7 +545,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Sarapan',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 10000,
-                'foto' => 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -518,7 +554,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Mie',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 12000,
-                'foto' => 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -528,7 +563,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Makanan',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 15000,
-                'foto' => 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -538,7 +572,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Makanan',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 18000,
-                'foto' => 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -548,7 +581,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Makanan',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 15000,
-                'foto' => 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -558,7 +590,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Makanan',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 12000,
-                'foto' => 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -568,7 +599,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Makanan',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 12000,
-                'foto' => 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -578,7 +608,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Jajanan',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 7000,
-                'foto' => 'https://images.unsplash.com/photo-1587132137056-bfbf0166836e?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -588,7 +617,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Jajanan',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 5000,
-                'foto' => 'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -598,7 +626,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Jajanan Tradisional',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 5000,
-                'foto' => 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -608,7 +635,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Jajanan Tradisional',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 5000,
-                'foto' => 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -618,7 +644,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Minuman',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 8000,
-                'foto' => 'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -628,7 +653,6 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Minuman',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 5000,
-                'foto' => 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=1600&q=90',
             ],
 
             [
@@ -638,12 +662,13 @@ class KulinerSeeder extends Seeder
                 'kategori' => 'Minuman Tradisional',
                 'alamat' => 'Tasikmalaya',
                 'harga_mulai' => 7000,
-                'foto' => 'https://images.unsplash.com/photo-1597318181409-cf64d0b5d8a2?auto=format&fit=crop&w=1600&q=90',
             ],
 
         ];
 
         foreach ($data as $item) {
+            $item['foto'] = $this->fotoUntuk($item['nama'], $item['slug']);
+
             Kuliner::updateOrCreate(
                 ['slug' => $item['slug']],
                 $item
@@ -651,7 +676,7 @@ class KulinerSeeder extends Seeder
         }
 
         $this->command->info(
-            'Data kuliner berhasil dimasukkan: ' . count($data) . ' data.'
+            'Data kuliner berhasil dimasukkan: ' . count($data) . ' data (foto disesuaikan dengan nama makanan).'
         );
     }
 }

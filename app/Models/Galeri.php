@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Galeri extends Model
 {
-    protected $fillable = ['destinasi_id', 'judul', 'foto', 'keterangan'];
+    use HasFactory;
+
+    protected $fillable = [
+        'destinasi_id', 'judul', 'foto', 'keterangan',
+    ];
 
     public function destinasi()
     {
