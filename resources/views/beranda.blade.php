@@ -23,10 +23,10 @@
         ['emoji'=>'🍜','nama'=>'Kuliner'],
     ]);
 
-    $eventList = $events ?? collect([
-        ['judul'=>'Festival Budaya Tasikmalaya','promo'=>'Diskon 20%'],
-        ['judul'=>'Wisata Religi Ramadan','promo'=>'Diskon 15%'],
-    ]);
+   $eventList = $events ?? collect([
+    ['judul'=>'Festival Budaya Tasikmalaya','promo'=>'Diskon 20%','gambar'=>null,'tanggal_mulai'=>null,'tanggal_selesai'=>null],
+    ['judul'=>'Wisata Religi Ramadan','promo'=>'Diskon 15%','gambar'=>null,'tanggal_mulai'=>null,'tanggal_selesai'=>null],
+]);
 
     $testimoniList = $testimonis ?? collect([
         ['nama'=>'Firman','isi'=>'Sangat mudah membeli tiket, prosesnya cepat.'],
@@ -181,9 +181,11 @@
     .jt-stat-card .jt-label{ color:#dceaf5; font-size:.9rem; }
 
     .jt-kategori-card{
-        background:#fff; border-radius:20px; padding:36px 16px; text-align:center; cursor:pointer;
-        box-shadow:0 8px 20px rgba(13,59,122,.08); border-top:3px solid transparent;
-        transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+    background:#fff; border-radius:20px; padding:36px 16px; text-align:center; cursor:pointer;
+    box-shadow:0 8px 20px rgba(13,59,122,.08); border-top:3px solid transparent;
+    transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+    display:block; text-decoration:none;
+
     }
     .jt-kategori-card:hover{ transform:scale(1.05); box-shadow:var(--jt-shadow); border-top-color:var(--jt-accent); }
     .jt-kategori-card .jt-emoji{ font-size:2.4rem; margin-bottom:10px; display:block; }
@@ -194,15 +196,36 @@
     .jt-alasan-item .jt-judul{ font-weight:600; }
 
     .jt-slider-track{ display:flex; gap:20px; overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:10px; scrollbar-width:none; }
-    .jt-slider-track::-webkit-scrollbar{ display:none; }
-    .jt-slider-track > *{ scroll-snap-align:start; flex-shrink:0; }
-    .jt-event-card{ width:340px; border-radius:20px; overflow:hidden; position:relative; height:200px; background:linear-gradient(135deg,var(--jt-primary),var(--jt-secondary)); color:#fff; padding:24px; display:flex; flex-direction:column; justify-content:flex-end; box-shadow:0 14px 30px rgba(13,59,122,.25); }
-    .jt-event-card .jt-promo-badge{ position:absolute; top:16px; right:16px; background:var(--jt-accent); color:#0d3b7a; font-size:.75rem; font-weight:700; padding:5px 12px; border-radius:20px; }
-    .jt-event-card h5{ font-weight:700; margin-bottom:14px; }
-    .jt-event-card a{ align-self:flex-start; background:#fff; color:var(--jt-primary); font-weight:600; padding:8px 18px; border-radius:10px; text-decoration:none; font-size:.85rem; }
-    .jt-slider-nav{ display:flex; gap:10px; justify-content:center; margin-top:16px; }
-    .jt-slider-nav button{ width:38px; height:38px; border-radius:50%; border:1.5px solid #dbe6f0; background:#fff; color:var(--jt-primary); cursor:pointer; }
-    .jt-slider-nav button:hover{ border-color:var(--jt-primary); color:var(--jt-primary); background:#eaf1ff; }
+.jt-slider-track::-webkit-scrollbar{ display:none; }
+.jt-slider-track > *{ scroll-snap-align:start; flex-shrink:0; }
+
+.jt-event-card{
+    width:300px; border-radius:20px; overflow:hidden; position:relative;
+    background:#fff; text-decoration:none; display:block; color:inherit;
+    box-shadow:0 10px 26px rgba(13,59,122,.12); border:1px solid #eaf1f8;
+    transition:transform .3s ease, box-shadow .3s ease;
+}
+.jt-event-card:hover{ transform:translateY(-6px); box-shadow:0 18px 36px rgba(13,59,122,.2); }
+.jt-event-media{
+    height:150px; background:linear-gradient(135deg,var(--jt-primary),var(--jt-secondary)); background-size:cover; background-position:center;
+    display:flex; align-items:center; justify-content:center; color:#fff; font-size:2rem;
+}
+.jt-event-card .jt-promo-badge{
+    position:absolute; top:14px; right:14px; background:var(--jt-accent); color:#0d3b7a;
+    font-size:.75rem; font-weight:700; padding:5px 12px; border-radius:20px; box-shadow:0 4px 10px rgba(0,0,0,.15);
+}
+.jt-event-body{ padding:18px 20px 22px; }
+.jt-event-tanggal{ display:flex; align-items:center; gap:6px; font-size:.78rem; color:#5b7391; font-weight:600; margin-bottom:8px; }
+.jt-event-body h5{ font-weight:700; color:var(--jt-primary); margin-bottom:14px; min-height:44px; }
+.jt-event-cta{ color:var(--jt-secondary); font-weight:600; font-size:.85rem; display:inline-flex; align-items:center; gap:6px; }
+.jt-event-card:hover .jt-event-cta{ gap:10px; }
+
+.jt-event-empty{ width:100%; text-align:center; padding:50px 20px; color:#5b7391; }
+.jt-event-empty i{ font-size:2.2rem; display:block; margin-bottom:12px; color:var(--jt-secondary); }
+
+.jt-slider-nav{ display:flex; gap:10px; justify-content:center; margin-top:16px; }
+.jt-slider-nav button{ width:38px; height:38px; border-radius:50%; border:1.5px solid #dbe6f0; background:#fff; color:var(--jt-primary); cursor:pointer; }
+.jt-slider-nav button:hover{ border-color:var(--jt-primary); color:var(--jt-primary); background:#eaf1ff; }
 
     .jt-testi-card{ width:340px; background:#fff; border-radius:20px; box-shadow:var(--jt-shadow); padding:28px; border-top:3px solid var(--jt-accent); }
     .jt-testi-card .jt-stars{ color:var(--jt-accent); margin-bottom:12px; }
@@ -265,7 +288,7 @@
 
         <div class="wt-hero-quicklinks">
             <a href="{{ route('destinasi') }}"><span>🏔️</span> Wisata</a>
-            <a href="{{ route('kuliner') }}"><span>🍜</span> Kuliner</a>
+           <a href="{{ route('kuliner.katalog') }}"><span>🍜</span> Kuliner</a>
             <a href="{{ route('pesan-tiket') }}"><span>🎟️</span> Tiket</a>
             <a href="{{ route('beranda') }}#event-promo"><span>🎉</span> Event</a>
         </div>
@@ -313,14 +336,21 @@
             <p>Pilih jenis wisata sesuai keinginanmu</p>
         </div>
         <div class="row g-3">
-            @foreach ($kategoriList as $kat)
-                <div class="col-6 col-md-4 col-lg jt-fade-up">
-                    <div class="jt-kategori-card">
-                        <span class="jt-emoji">{{ is_array($kat) ? $kat['emoji'] : $kat->emoji }}</span>
-                        <div class="jt-nama">{{ is_array($kat) ? $kat['nama'] : $kat->nama }}</div>
-                    </div>
-                </div>
-            @endforeach
+           @foreach ($kategoriList as $kat)
+    @php
+        $namaKat = is_array($kat) ? $kat['nama'] : $kat->nama;
+        $emojiKat = is_array($kat) ? $kat['emoji'] : $kat->emoji;
+        $urlKat = strtolower($namaKat) === 'kuliner'
+            ? route('kuliner.katalog')
+            : route('destinasi') . '?cari=' . urlencode($namaKat);
+    @endphp
+    <div class="col-6 col-md-4 col-lg jt-fade-up">
+        <a href="{{ $urlKat }}" class="jt-kategori-card">
+            <span class="jt-emoji">{{ $emojiKat }}</span>
+            <div class="jt-nama">{{ $namaKat }}</div>
+        </a>
+    </div>
+@endforeach
         </div>
     </div>
 </section>
@@ -465,7 +495,7 @@
             <div class="row g-4">
                 @foreach ($kulinerPopuler as $kuliner)
                     <div class="col-6 col-md-3">
-                        <a href="{{ route('kuliner') }}" class="wt-kuliner-card">
+                        <a href="{{ route('kuliner.detail', $kuliner) }}" class="wt-kuliner-card">
                             <div class="wt-kuliner-img">
                                <img src="{{ $kuliner->foto_url ?: asset('images/placeholder-kuliner.jpg') }}" alt="{{ $kuliner->nama }}" loading="lazy">
                             </div>
@@ -483,7 +513,7 @@
         @endif
 
         <div class="text-center mt-5">
-            <a href="{{ route('kuliner') }}" class="btn-lihat-semua">Lihat Semua Kuliner →</a>
+           <a href="{{ route('kuliner.katalog') }}" class="btn-lihat-semua">Lihat Semua Kuliner →</a>
         </div>
     </div>
 </section>
@@ -537,15 +567,44 @@
             <h2>Event &amp; Promo</h2>
             <p>Jangan lewatkan penawaran spesial dari kami</p>
         </div>
-        <div class="jt-slider-track" id="jtEventSlider">
-            @foreach ($eventList as $event)
-                <div class="jt-event-card jt-fade-up">
-                    <span class="jt-promo-badge">{{ is_array($event) ? $event['promo'] : $event->promo }}</span>
-                    <h5>{{ is_array($event) ? $event['judul'] : $event->judul }}</h5>
-                    <a href="{{ route('event.detail', is_array($event) ? ($event['id'] ?? '#') : $event->id) }}">Lihat</a>
-                </div>
-            @endforeach
+       <div class="jt-slider-track" id="jtEventSlider">
+    @forelse ($eventList as $event)
+        @php
+            $judul      = is_array($event) ? $event['judul'] : $event->judul;
+            $promo      = is_array($event) ? $event['promo'] : $event->promo;
+            $gambar     = is_array($event) ? ($event['gambar'] ?? null) : $event->gambar;
+            $tglMulai   = is_array($event) ? ($event['tanggal_mulai'] ?? null) : $event->tanggal_mulai;
+            $tglSelesai = is_array($event) ? ($event['tanggal_selesai'] ?? null) : $event->tanggal_selesai;
+            $eventId    = is_array($event) ? ($event['id'] ?? null) : $event->id;
+        @endphp
+        <a href="{{ $eventId ? route('event.detail', $eventId) : '#' }}" class="jt-event-card jt-fade-up">
+            <div class="jt-event-media" @if($gambar) style="background-image:url('{{ asset('storage/' . $gambar) }}');" @endif>
+                @unless ($gambar)
+                    <i class="bi bi-calendar-event"></i>
+                @endunless
+            </div>
+            <span class="jt-promo-badge">{{ $promo }}</span>
+            <div class="jt-event-body">
+                @if ($tglMulai)
+                    <span class="jt-event-tanggal">
+                        <i class="bi bi-calendar3"></i>
+                        {{ \Carbon\Carbon::parse($tglMulai)->translatedFormat('d M Y') }}
+                        @if ($tglSelesai && $tglSelesai != $tglMulai)
+                            &ndash; {{ \Carbon\Carbon::parse($tglSelesai)->translatedFormat('d M Y') }}
+                        @endif
+                    </span>
+                @endif
+                <h5>{{ $judul }}</h5>
+                <span class="jt-event-cta">Lihat Detail <i class="bi bi-arrow-right"></i></span>
+            </div>
+        </a>
+    @empty
+        <div class="jt-event-empty">
+            <i class="bi bi-calendar-x"></i>
+            <p class="mb-0">Belum ada event atau promo saat ini. Nantikan info terbaru dari kami!</p>
         </div>
+    @endforelse
+</div>
         <div class="jt-slider-nav">
             <button onclick="document.getElementById('jtEventSlider').scrollBy({left:-360,behavior:'smooth'})"><i class="bi bi-chevron-left"></i></button>
             <button onclick="document.getElementById('jtEventSlider').scrollBy({left:360,behavior:'smooth'})"><i class="bi bi-chevron-right"></i></button>
@@ -590,29 +649,76 @@
         </div>
 
         <div class="kontak-card mx-auto" style="max-width: 600px;">
-            <form>
+            @if (session('success'))
+                <div class="alert alert-success">{{ session('success') }}</div>
+            @endif
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <form action="{{ route('kontak.send') }}" method="POST" id="formKontakBeranda">
+                @csrf
+
                 <div class="mb-3 form-floating">
-                    <input type="text" class="form-control" id="nama" name="nama" placeholder="Nama">
-                    <label for="nama">Nama</label>
+                    <input type="text" class="form-control" id="namaBeranda" name="nama" placeholder="Nama" required>
+                    <label for="namaBeranda">Nama</label>
                 </div>
 
                 <div class="mb-3 form-floating">
-                    <input type="email" class="form-control" id="email" name="email" placeholder="Email">
-                    <label for="email">Email</label>
+                    <input type="email" class="form-control" id="emailBeranda" name="email" placeholder="Email" required>
+                    <label for="emailBeranda">Email</label>
                 </div>
 
                 <div class="mb-3 form-floating">
-                    <textarea class="form-control" id="pesan" name="pesan" placeholder="Pesan" style="height: 120px"></textarea>
-                    <label for="pesan">Pesan</label>
+                    <textarea class="form-control" id="pesanBeranda" name="pesan" placeholder="Pesan" style="height: 120px" required></textarea>
+                    <label for="pesanBeranda">Pesan</label>
                 </div>
 
-                <button type="submit" class="btn btn-kirim w-100">
-                    <span>Kirim Pesan</span>
-                </button>
+                <div class="d-flex flex-column flex-sm-row gap-2">
+                    <button type="button" id="btnWhatsappBeranda" class="btn btn-kirim w-100">
+                        <i class="bi bi-whatsapp"></i> <span>Kirim via WhatsApp</span>
+                    </button>
+
+                    <button type="submit" class="btn btn-kirim w-100">
+                        <i class="bi bi-send-fill"></i> <span>Kirim ke Email</span>
+                    </button>
+                </div>
             </form>
         </div>
     </div>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var nomorWhatsapp = '{{ $kontakWhatsapp ?? ($profilSitus->kontak_whatsapp ?? "6281261604202") }}';
+
+    var namaInput  = document.getElementById('namaBeranda');
+    var emailInput = document.getElementById('emailBeranda');
+    var pesanInput = document.getElementById('pesanBeranda');
+    var btnWa      = document.getElementById('btnWhatsappBeranda');
+
+    if (btnWa) {
+        btnWa.addEventListener('click', function () {
+            if (!namaInput.value.trim() || !emailInput.value.trim() || !pesanInput.value.trim()) {
+                alert('Mohon lengkapi semua field terlebih dahulu.');
+                return;
+            }
+
+            var teks = `Halo, saya ${namaInput.value}%0A` +
+                       `Email: ${emailInput.value}%0A` +
+                       `Pesan: ${pesanInput.value}`;
+
+            window.open(`https://wa.me/${nomorWhatsapp}?text=${teks}`, '_blank');
+        });
+    }
+});
+</script>
 
 <!-- ===== CTA BOOKING ===== -->
 <section class="jt-section">

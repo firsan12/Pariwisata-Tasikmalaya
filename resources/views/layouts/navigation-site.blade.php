@@ -40,7 +40,7 @@
                     <a class="nav-link {{ request()->routeIs('destinasi') || request()->routeIs('destinasi.detail') ? 'active' : '' }}" href="{{ route('destinasi') }}">Destinasi</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('kuliner') ? 'active' : '' }}" href="{{ route('kuliner') }}">Kuliner</a>
+                   <a class="nav-link {{ request()->routeIs('kuliner.katalog') || request()->routeIs('kuliner.detail') ? 'active' : '' }}" href="{{ route('kuliner.katalog') }}">Kuliner</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('pesan-tiket') || request()->routeIs('pembayaran.show') ? 'active' : '' }}" href="{{ route('pesan-tiket') }}">Tiket</a>

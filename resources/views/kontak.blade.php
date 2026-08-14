@@ -85,7 +85,22 @@
             {{-- Bagian 3: Form (kanan) --}}
             <div class="col-12 col-lg-7">
                 <div class="kontak-card">
-                    <form id="formKontak">
+                    @if (session('success'))
+                        <div class="alert alert-success">{{ session('success') }}</div>
+                    @endif
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <form action="{{ route('kontak.send') }}" method="POST">
+                        @csrf
+
                         <div class="mb-3 form-floating">
                             <input type="text" class="form-control" id="nama" name="nama" placeholder="Nama" required>
                             <label for="nama">Nama</label>
@@ -106,8 +121,8 @@
                                 <i class="bi bi-whatsapp"></i> <span>Kirim via WhatsApp</span>
                             </button>
 
-                            <button type="button" id="btnEmail" class="btn btn-kirim-outline w-100">
-                                <i class="bi bi-envelope-fill"></i> <span>Kirim via Email</span>
+                            <button type="submit" class="btn btn-kirim w-100">
+                                <i class="bi bi-send-fill"></i> <span>Kirim ke Email</span>
                             </button>
                         </div>
                     </form>
@@ -121,7 +136,6 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const nomorWhatsapp = '{{ $kontakWhatsapp }}'; // format internasional tanpa "+" atau "0" di depan
-    const emailTujuan   = '{{ $kontakEmail }}';
 
     const namaInput  = document.getElementById('nama');
     const emailInput = document.getElementById('email');
@@ -146,17 +160,8 @@ document.addEventListener('DOMContentLoaded', function () {
         window.open(url, '_blank');
     });
 
-    document.getElementById('btnEmail').addEventListener('click', function () {
-        if (!validasiForm()) return;
-
-        const subjek = encodeURIComponent(`Pesan dari ${namaInput.value} - Wisata Tasikmalaya`);
-        const body = encodeURIComponent(
-            `Nama: ${namaInput.value}\nEmail: ${emailInput.value}\n\nPesan:\n${pesanInput.value}`
-        );
-
-        const url = `mailto:${emailTujuan}?subject=${subjek}&body=${body}`;
-        window.location.href = url;
-    });
+    // Tombol "Kirim ke Email" sekarang type="submit" — otomatis submit form
+    // asli ke server (route kontak.send), tidak perlu JavaScript tambahan lagi.
 });
 </script>
 

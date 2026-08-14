@@ -4,97 +4,31 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Kuliner;
+use Illuminate\Support\Facades\File;
 
 class KulinerSeeder extends Seeder
 {
     /**
-     * Kata kunci foto (bahasa Inggris, untuk loremflickr) per jenis makanan.
-     * Dicocokkan dengan mencari potongan kata di nama menu (huruf kecil).
-     * Urutan penting — yang lebih spesifik ditaruh lebih dulu.
+     * Path foto kuliner — SELALU 1 kuliner = 1 file, dinamai dari slug.
+     * File asli harus ditaruh manual di: public/images/kuliner/{slug}.jpg
+     *
+     * Kalau file belum ada, model Kuliner::foto_url akan otomatis
+     * menampilkan placeholder berisi NAMA kuliner (lihat app/Models/Kuliner.php),
+     * jadi tidak akan pernah tampil foto yang salah/tidak sesuai nama.
      */
-    protected array $petaKataKunci = [
-        // PENTING: satu kata kunci UMUM saja per baris (tanpa koma, tanpa
-        // tanda hubung/hyphen). loremflickr menganggap kata yang dipisah
-        // koma sebagai "harus cocok SEMUA sekaligus" (AND), bukan salah
-        // satu — jadi kombinasi kata yang jarang/aneh sering tidak ada
-        // hasilnya (gambar patah). Kata umum tunggal jauh lebih pasti ada.
-        'sate'           => 'satay',
-        'bakso'          => 'meatball',
-        'soto'           => 'soup',
-        'mie kocok'      => 'noodles',
-        'mie'            => 'noodles',
-        'kwetiau'        => 'noodles',
-        'kopi'           => 'coffee',
-        'wedang'         => 'ginger',
-        'bandrek'        => 'ginger',
-        'bajigur'        => 'drink',
-        'es cendol'      => 'dessert',
-        'es dawet'       => 'dessert',
-        'es campur'      => 'fruit',
-        'es kelapa'      => 'coconut',
-        'es teh'         => 'tea',
-        'es '            => 'drink',
-        'kerupuk'        => 'cracker',
-        'keripik'        => 'chips',
-        'opak'           => 'cracker',
-        'rangginang'     => 'cracker',
-        'klepon'         => 'dessert',
-        'putu'           => 'dessert',
-        'wajit'          => 'dessert',
-        'colenak'        => 'dessert',
-        'peuyeum'        => 'cassava',
-        'combro'         => 'snack',
-        'misro'          => 'snack',
-        'cireng'         => 'snack',
-        'cilok'          => 'meatball',
-        'batagor'        => 'dumpling',
-        'siomay'         => 'dumpling',
-        'seblak'         => 'noodles',
-        'tahu gejrot'    => 'tofu',
-        'tahu'           => 'tofu',
-        'ayam goreng'    => 'chicken',
-        'ayam penyet'    => 'chicken',
-        'ayam'           => 'chicken',
-        'gurame'         => 'fish',
-        'lele'           => 'fish',
-        'ikan'           => 'fish',
-        'pisang goreng'  => 'banana',
-        'pisang molen'   => 'banana',
-        'pisang'         => 'banana',
-        'nasi goreng'    => 'rice',
-        'nasi kuning'    => 'rice',
-        'nasi'           => 'rice',
-        'lontong'        => 'rice',
-        'karedok'        => 'salad',
-        'lotek'          => 'salad',
-        'pecel'          => 'salad',
-        'surabi'         => 'pancake',
-        'donat'          => 'donut',
-        'bubur'          => 'porridge',
-        'sambal'         => 'chili',
-    ];
-
-    protected function fotoUntuk(string $nama, string $slug): string
+    protected function fotoUntuk(string $slug): string
     {
-        $namaLower = mb_strtolower($nama);
-        $kataKunci = 'food'; // fallback — kata umum, pasti banyak hasilnya
-
-        foreach ($this->petaKataKunci as $kunci => $tag) {
-            if (str_contains($namaLower, $kunci)) {
-                $kataKunci = $tag;
-                break;
-            }
-        }
-
-        // lock dibuat dari slug supaya foto TETAP SAMA setiap dibuka lagi
-        // (tanpa lock, loremflickr kasih foto acak baru tiap request)
-        $lock = crc32($slug) % 100000;
-
-        return "https://loremflickr.com/1600/1000/{$kataKunci}?lock={$lock}";
+        return "images/kuliner/{$slug}.jpg";
     }
 
     public function run(): void
     {
+        // Pastikan folder foto kuliner tersedia
+        $folderFoto = public_path('images/kuliner');
+        if (!File::exists($folderFoto)) {
+            File::makeDirectory($folderFoto, 0755, true);
+        }
+
         $data = [
 
             [
@@ -667,7 +601,7 @@ class KulinerSeeder extends Seeder
         ];
 
         foreach ($data as $item) {
-            $item['foto'] = $this->fotoUntuk($item['nama'], $item['slug']);
+            $item['foto'] = $this->fotoUntuk($item['slug']);
 
             Kuliner::updateOrCreate(
                 ['slug' => $item['slug']],
@@ -675,8 +609,22 @@ class KulinerSeeder extends Seeder
             );
         }
 
-        $this->command->info(
-            'Data kuliner berhasil dimasukkan: ' . count($data) . ' data (foto disesuaikan dengan nama makanan).'
-        );
+        // ================================================
+        // Laporan foto 1:1 — dihitung dari database & disk
+        // yang sebenarnya, bukan angka karangan.
+        // ================================================
+        $totalKuliner = Kuliner::count();
+        $adaFotoLokal = 0;
+
+        foreach (Kuliner::all() as $k) {
+            if ($k->foto && file_exists(public_path($k->foto))) {
+                $adaFotoLokal++;
+            }
+        }
+
+        $this->command->info("Data kuliner berhasil dimasukkan: {$totalKuliner} data.");
+        $this->command->info("Foto lokal sudah tersedia di public/images/kuliner: {$adaFotoLokal}");
+        $this->command->info("Foto lokal BELUM tersedia (masih pakai placeholder nama): " . ($totalKuliner - $adaFotoLokal));
+        $this->command->warn("Lengkapi foto asli di public/images/kuliner/{slug}.jpg agar semua kuliner punya foto asli 1:1.");
     }
 }

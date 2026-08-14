@@ -10,7 +10,7 @@
 @endphp
 <div class="kartu">
     <div class="kartu-img-wrap">
-        <img src="{{ asset('images/' . $destinasi->gambar) }}" alt="Foto {{ $destinasi->nama }}">
+       <img src="{{ asset('storage/' . $destinasi->gambar) }}" alt="Foto {{ $destinasi->nama }}">
         <span class="badge-status {{ $destinasi->is_buka ? 'buka' : 'tutup' }}">
             <span class="badge-dot"></span> {{ $destinasi->is_buka ? 'Sedang buka' : 'Sedang tutup' }}
         </span>

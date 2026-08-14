@@ -25,6 +25,10 @@ class DatabaseSeeder extends Seeder
             BerandaStatistikSeeder::class,
             KeunggulanSeeder::class,
             TentangContentSeeder::class,
+            destinasiSeeder::class,
+            kulinerSeeder::class,
+            AtraksiSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }

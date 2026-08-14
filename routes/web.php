@@ -26,6 +26,8 @@ Route::get('/', [DestinasiController::class, 'beranda'])->name('beranda');
 
 Route::get('/tentang', [TentangController::class, 'index'])->name('tentang');
 Route::get('/kontak', [KontakController::class, 'index'])->name('kontak');
+Route::post('/kontak', [KontakController::class, 'send'])->name('kontak.send');
+
 
 Route::get('/destinasi', [DestinasiController::class, 'index'])->name('destinasi');
 Route::get('/destinasi/create', [DestinasiController::class, 'create'])->name('destinasi.create');

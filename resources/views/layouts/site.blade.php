@@ -81,7 +81,7 @@
                             <li><a href="{{ route('destinasi') }}?cari=Gunung" class="footer-link"><i class="bi bi-chevron-right footer-icon"></i>Gunung</a></li>
                             <li><a href="{{ route('destinasi') }}?cari=Religi" class="footer-link"><i class="bi bi-chevron-right footer-icon"></i>Religi</a></li>
                             <li><a href="{{ route('destinasi') }}?cari=Budaya" class="footer-link"><i class="bi bi-chevron-right footer-icon"></i>Budaya</a></li>
-                            <li><a href="{{ route('kuliner') }}" class="footer-link"><i class="bi bi-chevron-right footer-icon"></i>Kuliner</a></li>
+                          <li><a href="{{ route('kuliner.katalog') }}" class="footer-link"><i class="bi bi-chevron-right footer-icon"></i>Kuliner</a></li>
                         </ul>
                     </div>
 

@@ -4,37 +4,57 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\Storage;
 
 class Kuliner extends Model
 {
     protected $fillable = [
         'nama',
+        'slug',
         'deskripsi',
         'alamat',
         'foto',
         'harga_mulai',
-        'kategori', // ← tambahkan ini
+        'kategori',
     ];
 
-   // app/Models/Kuliner.php
-protected function fotoUrl(): Attribute
-{
-    return Attribute::make(
-        get: function () {
-            if (!$this->foto) {
-                return null;
-            }
+    /**
+     * Accessor foto_url — 1 kuliner = 1 foto yang sesuai nama.
+     *
+     * Urutan prioritas:
+     * 1. foto sudah berupa URL penuh (http/https) -> pakai langsung
+     * 2. foto lokal hasil seeder di public/images/kuliner/{slug}.jpg
+     *    -> dipakai kalau file-nya sudah benar-benar ada
+     * 3. foto hasil upload lewat form admin (Storage disk 'public')
+     * 4. belum ada file sama sekali -> placeholder otomatis berisi
+     *    NAMA kuliner (sementara, sampai foto asli di-upload)
+     */
+    protected function fotoUrl(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $foto = $this->foto;
 
-            // Kalau sudah URL lengkap (http/https), pakai langsung
-            if (str_starts_with($this->foto, 'http://') || str_starts_with($this->foto, 'https://')) {
-                return $this->foto;
-            }
+                if ($foto && (str_starts_with($foto, 'http://') || str_starts_with($foto, 'https://'))) {
+                    return $foto;
+                }
 
-            // Kalau path lokal, cek file benar-benar ada di storage
-            return \Storage::disk('public')->exists($this->foto)
-                ? asset('storage/'.$this->foto)
-                : null;
-        },
-    );
-}
+                if ($foto && file_exists(public_path($foto))) {
+                    return asset($foto);
+                }
+
+                if ($foto && Storage::disk('public')->exists($foto)) {
+                    return asset('storage/' . $foto);
+                }
+
+                if (!$this->nama) {
+                    return null;
+                }
+
+                // Placeholder sementara berisi nama kuliner (bukan foto asli)
+                return 'https://placehold.co/800x600/eef5fb/3b6ea5?font=poppins&text='
+                    . urlencode($this->nama);
+            },
+        );
+    }
 }
