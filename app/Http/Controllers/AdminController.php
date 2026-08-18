@@ -8,28 +8,23 @@ use App\Models\Atraksi;
 use App\Models\User;
 use App\Models\Ulasan;
 
-
 class AdminController extends Controller
 {
- 
-public function dashboard()
-{
-    $data = [
-        'totalDestinasi' => Destinasi::count(),
-        'totalAtraksi' => Atraksi::count(),
-        'totalUser' => User::count(),
-        'totalUlasan' => Ulasan::count(),
-    ];
- 
-    return view('admin.dashboard', $data);
-   
-{
-    if (auth()->check() && auth()->user()->role === 'admin') {
-        return $next($request);
+    /**
+     * Route menuju method ini sudah dilindungi middleware ['auth', 'admin']
+     * di routes/web.php, jadi tidak perlu pengecekan role lagi di sini.
+     * (Sebelumnya ada sisa kode middleware yang nyangkut/rusak di dalam
+     * method ini — sudah dibersihkan.)
+     */
+    public function dashboard()
+    {
+        $data = [
+            'totalDestinasi' => Destinasi::count(),
+            'totalAtraksi'   => Atraksi::count(),
+            'totalUser'      => User::count(),
+            'totalUlasan'    => Ulasan::count(),
+        ];
+
+        return view('admin.dashboard', $data);
     }
-
-    return redirect('/')->with('error', 'Akses khusus admin.');
-}
-}
-
 }
