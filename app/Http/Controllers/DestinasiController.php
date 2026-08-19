@@ -66,7 +66,16 @@ class DestinasiController extends Controller
 
     public function show($id)
     {
-        $destinasi = Destinasi::with(['atraksi', 'galeri'])->findOrFail($id);
+        // Relasi 'ulasan' di-filter supaya publik hanya melihat ulasan
+        // yang statusnya sudah 'approved' (disetujui admin). Ulasan
+        // 'pending' atau 'ditolak' tidak boleh tampil di halaman ini —
+        // itulah gunanya alur moderasi di panel admin (/admin/ulasan).
+        $destinasi = Destinasi::with([
+                'atraksi',
+                'galeri',
+                'ulasan' => fn ($q) => $q->approved()->terbaru(),
+            ])
+            ->findOrFail($id);
 
         $destinasiLain = Destinasi::where('id', '!=', $destinasi->id)
             ->inRandomOrder()
@@ -99,6 +108,18 @@ class DestinasiController extends Controller
             'kuota_anak'   => 'required|integer|min:0',
             'kuota_asing'  => 'required|integer|min:0',
         ]);
+
+        // FIX: sebelumnya file gambar tidak pernah diproses di sini, jadi
+        // key 'gambar' tidak ada di $validated saat tidak ada file yang
+        // diupload -> kolom 'gambar' di DB tidak diisi -> error SQL
+        // "Field 'gambar' doesn't have a default value". Sekarang file
+        // diupload ke storage kalau ada, atau di-set null secara eksplisit
+        // kalau tidak ada (kolom 'gambar' di migration harus nullable).
+        if ($request->hasFile('gambar')) {
+            $validated['gambar'] = $request->file('gambar')->store('destinasi', 'public');
+        } else {
+            $validated['gambar'] = null;
+        }
 
         $destinasi = Destinasi::create($validated);
 

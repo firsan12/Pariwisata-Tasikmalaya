@@ -128,20 +128,24 @@
                 </a>
 
 
-                <div class="stat-card">
+                <a href="{{ route('ulasan.admin') }}" class="stat-card">
                     <div class="stat-icon purple">
                         <i class="bi bi-star-fill"></i>
                     </div>
 
                     <div class="stat-content">
                         <span>Total Ulasan</span>
-                        <strong>{{ $totalUlasan ?? 486 }}</strong>
+                        <strong>{{ $totalUlasan ?? 0 }}</strong>
                         <small>
                             <i class="bi bi-chat-square-text"></i>
-                            Dari pengunjung
+                            @if (($ulasanPending ?? 0) > 0)
+                                {{ $ulasanPending }} menunggu persetujuan
+                            @else
+                                Dari pengunjung
+                            @endif
                         </small>
                     </div>
-                </div>
+                </a>
 
             </div>
         </section>
@@ -221,6 +225,18 @@
                     <div>
                         <h4>Event</h4>
                         <p>Kelola agenda wisata</p>
+                    </div>
+                    <i class="bi bi-arrow-right quick-arrow"></i>
+                </a>
+
+
+                <a href="{{ route('ulasan.admin') }}" class="quick-card">
+                    <div class="quick-icon purple">
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                    <div>
+                        <h4>Ulasan</h4>
+                        <p>Moderasi ulasan pengunjung</p>
                     </div>
                     <i class="bi bi-arrow-right quick-arrow"></i>
                 </a>

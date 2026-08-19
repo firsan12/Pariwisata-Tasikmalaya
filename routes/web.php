@@ -15,6 +15,7 @@ use App\Http\Controllers\TentangController;
 use App\Http\Controllers\KontakController;
 use App\Http\Controllers\EventPromoController;
 use App\Http\Controllers\AdminController;
+use App\Models\Ulasan;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,6 +34,13 @@ use App\Http\Controllers\AdminController;
 | sehingga rawan bug/celah keamanan kalau urutan berubah. Sekarang setiap
 | route hanya didefinisikan SATU KALI.
 |
+| CATATAN FIX: route publik dengan parameter dinamis seperti
+| /destinasi/{id} HARUS dibatasi hanya menerima angka (->where('id',
+| '[0-9]+')). Tanpa ini, path statis seperti /destinasi/create milik
+| grup admin di bawah akan "tertangkap" duluan oleh route {id} ini
+| (karena "create" dianggap sebagai nilai {id}), sehingga menyebabkan
+| 404 dari findOrFail() alih-alih menampilkan form create.
+|
 */
 
 // =======================================================================
@@ -47,7 +55,9 @@ Route::post('/kontak', [KontakController::class, 'send'])->name('kontak.send');
 
 // Destinasi (baca saja)
 Route::get('/destinasi', [DestinasiController::class, 'index'])->name('destinasi');
-Route::get('/destinasi/{id}', [DestinasiController::class, 'show'])->name('destinasi.detail');
+Route::get('/destinasi/{id}', [DestinasiController::class, 'show'])
+    ->name('destinasi.detail')
+    ->where('id', '[0-9]+');
 
 // Ulasan — publik hanya boleh mengirim ulasan baru (menunggu moderasi admin)
 Route::post('/destinasi/{destinasi}/ulasan', [UlasanController::class, 'store'])->name('ulasan.store');
@@ -94,7 +104,10 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    $totalUlasan   = Ulasan::count();
+    $ulasanPending = Ulasan::where('status', 'pending')->count();
+
+    return view('dashboard', compact('totalUlasan', 'ulasanPending'));
 })->middleware(['auth', 'verified', 'admin'])->name('dashboard');
 
 // =======================================================================
@@ -162,7 +175,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/event/{id}', [EventPromoController::class, 'destroy'])->name('event.destroy');
 
     // Ulasan — moderasi/balas/hapus adalah aksi admin
+    Route::get('/admin/ulasan', [UlasanController::class, 'index'])->name('ulasan.admin');
     Route::delete('/ulasan/{ulasan}', [UlasanController::class, 'destroy'])->name('ulasan.destroy');
     Route::patch('/ulasan/{ulasan}/approve', [UlasanController::class, 'approve'])->name('ulasan.approve');
+    Route::patch('/ulasan/{ulasan}/reject', [UlasanController::class, 'reject'])->name('ulasan.reject');
     Route::post('/ulasan/{ulasan}/balas', [UlasanController::class, 'balas'])->name('ulasan.balas');
 });

@@ -10,6 +10,31 @@ use Illuminate\Http\Request;
 class UlasanController extends Controller
 {
     /**
+     * Admin: daftar semua ulasan, bisa difilter per status
+     * (?status=pending|approved|ditolak). Dipakai oleh halaman
+     * 'Kelola Ulasan' di panel admin.
+     */
+    public function index(Request $request)
+    {
+        $status = $request->input('status');
+
+        $ulasanList = Ulasan::with('destinasi')
+            ->when($status, fn ($q) => $q->where('status', $status))
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+        $counts = [
+            'semua'    => Ulasan::count(),
+            'pending'  => Ulasan::where('status', 'pending')->count(),
+            'approved' => Ulasan::where('status', 'approved')->count(),
+            'ditolak'  => Ulasan::where('status', 'ditolak')->count(),
+        ];
+
+        return view('ulasan-admin', compact('ulasanList', 'counts', 'status'));
+    }
+
+    /**
      * Simpan ulasan baru untuk sebuah destinasi.
      * Dipanggil via AJAX dari form di partial 'partials.ulasan-section'.
      */
@@ -40,12 +65,9 @@ class UlasanController extends Controller
      */
     public function destroy(Ulasan $ulasan): RedirectResponse
     {
-        $destinasiId = $ulasan->destinasi_id;
         $ulasan->delete();
 
-        return redirect()
-            ->route('destinasi.detail', $destinasiId)
-            ->with('success', 'Ulasan berhasil dihapus.');
+        return back()->with('success', 'Ulasan berhasil dihapus.');
     }
 
     /**
@@ -56,6 +78,16 @@ class UlasanController extends Controller
         $ulasan->update(['status' => 'approved']);
 
         return back()->with('success', 'Ulasan disetujui dan tampil di halaman destinasi.');
+    }
+
+    /**
+     * Admin: tolak ulasan yang berstatus pending.
+     */
+    public function reject(Ulasan $ulasan): RedirectResponse
+    {
+        $ulasan->update(['status' => 'ditolak']);
+
+        return back()->with('success', 'Ulasan ditolak dan tidak akan tampil di halaman destinasi.');
     }
 
     /**

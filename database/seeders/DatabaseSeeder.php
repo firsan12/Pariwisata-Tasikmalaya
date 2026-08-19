@@ -29,6 +29,10 @@ class DatabaseSeeder extends Seeder
             kulinerSeeder::class,
             AtraksiSeeder::class,
             UserSeeder::class,
+            KategoriSeeder::class,
+            keunggulanSeeder::class,
+            destinasigaleriSeeder::class,
+            galeriSeeder::class,
         ]);
     }
 }

@@ -96,6 +96,24 @@ public function ulasan()
         return 'tersedia';
     }
 
+    /**
+     * Rata-rata rating destinasi, dihitung HANYA dari ulasan yang
+     * statusnya sudah 'approved'. Otomatis berubah begitu admin
+     * menyetujui ulasan baru — tidak perlu kolom tersimpan terpisah.
+     */
+    public function getRatingRataRataAttribute(): float
+    {
+        return round($this->ulasan()->approved()->avg('rating') ?? 0, 1);
+    }
+
+    /**
+     * Jumlah ulasan yang sudah disetujui (tampil publik). Ulasan
+     * 'pending' atau 'ditolak' tidak dihitung di sini.
+     */
+    public function getJumlahUlasanAttribute(): int
+    {
+        return $this->ulasan()->approved()->count();
+    }
+
     
 }
-

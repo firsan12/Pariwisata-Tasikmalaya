@@ -242,9 +242,9 @@
             <h1>{{ $destinasi->nama }}</h1>
             <div class="hero-meta">
                 <span class="stars">
-                    @php $r = round($destinasi->rating ?? 0); @endphp
-                    @for ($i=1;$i<=5;$i++)<i class="bi {{ $i <= $r ? 'bi-star-fill' : 'bi-star' }}"></i>@endfor
-                    {{ number_format($destinasi->rating ?? 0, 1) }} ({{ $destinasi->ulasan_count ?? ($destinasi->ulasan->count() ?? 0) }} Ulasan)
+                    @php $rHero = round($destinasi->rating_rata_rata); @endphp
+                    @for ($i=1;$i<=5;$i++)<i class="bi {{ $i <= $rHero ? 'bi-star-fill' : 'bi-star' }}"></i>@endfor
+                    {{ number_format($destinasi->rating_rata_rata, 1) }} ({{ $destinasi->jumlah_ulasan }} Ulasan)
                 </span>
                 <span><i class="bi bi-geo-alt-fill"></i> {{ $destinasi->lokasi ?? '-' }}</span>
                 <span><i class="bi bi-building"></i> {{ $destinasi->kategori ?? 'Wisata' }}</span>
@@ -286,7 +286,7 @@
             <div class="info-cell">
                 <i class="bi bi-star-fill"></i>
                 <div class="info-label">Rating</div>
-                <div class="info-value">{{ number_format($destinasi->rating ?? 0, 1) }}</div>
+                <div class="info-value">{{ number_format($destinasi->rating_rata_rata, 1) }}</div>
             </div>
             <div class="info-cell">
                 <i class="bi bi-people-fill"></i>
@@ -418,10 +418,13 @@
             <div class="content-section" id="review">
                 <h2>Review</h2>
                 <div class="review-summary">
-                    <div class="avg">{{ number_format($destinasi->rating ?? 0, 1) }}</div>
+                    <div class="avg">{{ number_format($destinasi->rating_rata_rata, 1) }}</div>
                     <div>
-                        <div class="stars">@for ($i=1;$i<=5;$i++)<i class="bi bi-star-fill"></i>@endfor</div>
-                        <div style="color:#8a93a3; font-size:.85rem;">{{ $destinasi->ulasan_count ?? ($destinasi->ulasan->count() ?? 0) }} Ulasan</div>
+                        <div class="stars">
+                            @php $rReview = round($destinasi->rating_rata_rata); @endphp
+                            @for ($i=1;$i<=5;$i++)<i class="bi {{ $i <= $rReview ? 'bi-star-fill' : 'bi-star' }}"></i>@endfor
+                        </div>
+                        <div style="color:#8a93a3; font-size:.85rem;">{{ $destinasi->jumlah_ulasan }} Ulasan</div>
                     </div>
                 </div>
                 {{-- Daftar ulasan & form ulasan tetap memakai partial yang sudah ada --}}

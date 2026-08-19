@@ -145,6 +145,17 @@
         margin-top: 0.3rem;
     }
 
+    .form-atraksi-preview-gambar {
+        width: 100%;
+        max-width: 220px;
+        height: 130px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1.5px solid #e2e8f0;
+        margin-bottom: 0.6rem;
+        display: block;
+    }
+
     .btn-simpan-atraksi {
         background: linear-gradient(135deg, #0369a1, #0ea5e9);
         border: none;
@@ -204,7 +215,10 @@
                     </div>
 
                     <div class="card-form-atraksi-body">
-                        <form action="{{ route('atraksi.update', $atraksi->id) }}" method="POST">
+                        {{-- FIX: tambahkan enctype="multipart/form-data" — tanpa ini,
+                             input type="file" di bawah TIDAK PERNAH terkirim ke server,
+                             sehingga gambar baru tidak akan pernah tersimpan. --}}
+                        <form action="{{ route('atraksi.update', $atraksi->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
 
@@ -278,13 +292,31 @@
                             </div>
 
                             <div class="mb-4">
-                                <label for="gambar" class="form-atraksi-label">Nama File Gambar</label>
-                                <input type="file" name="gambar" class="form-control" accept="image/*">
+                                {{-- FIX: label diganti dari "Nama File Gambar" -> "Gambar Atraksi",
+                                     karena input di bawah sudah berupa file picker asli, bukan
+                                     kolom teks nama file. --}}
+                                <label for="gambar" class="form-atraksi-label"><i class="bi bi-image"></i> Gambar Atraksi</label>
+
+                                {{-- FIX: tambahkan preview gambar yang sedang tersimpan, supaya
+                                     admin tahu gambar saat ini seperti apa sebelum menggantinya. --}}
+                                @if (!empty($atraksi->gambar))
+                                    <img src="{{ asset('storage/' . $atraksi->gambar) }}"
+                                         alt="Gambar saat ini"
+                                         class="form-atraksi-preview-gambar"
+                                         onerror="this.style.display='none';">
+                                @endif
+
+                                <input type="file" name="gambar" id="gambar"
+                                       class="form-control form-atraksi-control @error('gambar') is-invalid @enderror"
+                                       accept="image/*">
                                 @error('gambar')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                                {{-- FIX: hint lama menyuruh ketik path manual (mis. "atraksi/nama-file.jpg"),
+                                     padahal ini input upload file sungguhan. Diganti jadi info yang
+                                     relevan dan menjelaskan perilaku "kosongkan = tetap pakai gambar lama". --}}
                                 <div class="form-atraksi-hint">
-                                    Isi dengan path lengkap, contoh: <code>atraksi/nama-file.jpg</code> — harus sama persis dengan nama file di server (termasuk huruf besar/kecil dan folder).
+                                    Format JPG/PNG/WebP, maksimal 2MB. Kosongkan kalau tidak ingin mengganti gambar.
                                 </div>
                             </div>
 

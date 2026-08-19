@@ -204,7 +204,10 @@
                     </div>
 
                     <div class="card-form-atraksi-body">
-                        <form action="{{ route('atraksi.store') }}" method="POST">
+                        {{-- FIX: tambahkan enctype="multipart/form-data" — tanpa ini,
+                             input type="file" di bawah TIDAK PERNAH terkirim ke server,
+                             berapa pun kali dicoba. --}}
+                        <form action="{{ route('atraksi.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
 
                             <div class="mb-3">
@@ -279,16 +282,21 @@
                             </div>
 
                             <div class="mb-4">
-                                <label for="gambar" class="form-atraksi-label">Nama File Gambar</label>
-                                <input type="text" name="gambar" id="gambar"
+                                {{-- FIX: label class disamakan (tasik-label -> form-atraksi-label,
+                                     class itu tidak ada di <style> di atas sehingga sebelumnya
+                                     label ini tidak ikut ter-style seperti label lain) --}}
+                                <label for="gambar" class="form-atraksi-label"><i class="bi bi-image"></i> Gambar Atraksi</label>
+                                <input type="file" name="gambar" id="gambar"
                                        class="form-control form-atraksi-control @error('gambar') is-invalid @enderror"
-                                       value="{{ old('gambar') }}"
-                                       placeholder="contoh: atraksi/tari-zapin.jpg">
+                                       accept="image/*">
                                 @error('gambar')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                                {{-- FIX: hint lama menyuruh user mengetik path folder secara manual,
+                                     padahal ini input upload file sungguhan. Diganti dengan info
+                                     yang relevan (format & ukuran maksimal). --}}
                                 <div class="form-atraksi-hint">
-                                    Wajib sertakan folder <code>atraksi/</code> di depan nama file, sesuai lokasi file di <code>storage/atraksi/</code>. Nama harus sama persis (besar/kecil huruf & spasi).
+                                    Format JPG/PNG/WebP, maksimal 2MB. Boleh dikosongkan.
                                 </div>
                             </div>
 
